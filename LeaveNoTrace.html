@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Leave No Trace - Family Feud Style Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Montserrat', sans-serif;
+        background: #f7f7f7;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1, h2, h3 {
+        color: #333;
+        text-align: center;
+        margin: 0;
+    }
+
+    h1 {
+        margin: 20px 0;
+        font-size: 2.5em;
+    }
+
+    .scoreboard {
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        width: 90%;
+        max-width: 1000px;
+        margin-bottom: 20px;
+        gap: 20px;
+    }
+
+    .team {
+        background: #fff;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .team h2 {
+        margin-bottom: 10px;
+        font-size: 1.5em;
+        color: #333;
+    }
+
+    .team-score {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .control-indicator {
+        margin-top: 10px;
+        font-size: 1.2em;
+        color: #E74C3C;
+        font-weight: bold;
+    }
+
+    .round-container {
+        width: 90%;
+        max-width: 1200px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .round-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #round-title {
+        font-size: 1.8em;
+        color: #333;
+    }
+
+    #answers-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .answer-box {
+        width: 45%;
+        height: 150px;
+        background: #2c3e50;
+        color: #fff;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        perspective: 1000px;
+        user-select: none;
+    }
+
+    .answer-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        border-radius: 8px;
+    }
+
+    .answer-box.revealed .answer-inner {
+        transform: rotateY(180deg);
+    }
+
+    .answer-front, .answer-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        font-size: 2em;
+        padding: 0 10px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .answer-front {
+        background: #2c3e50;
+        color: #fff;
+        font-size: 3em;
+    }
+
+    .answer-back {
+        background: #f1c40f;
+        color: #333;
+        transform: rotateY(180deg);
+        font-size: 1em;
+        font-weight: 600;
+        padding: 10px;
+    }
+
+    .round-navigation {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .round-navigation button {
+        margin: 5px;
+        padding: 10px 20px;
+        background: #4BB543;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .round-navigation button:hover {
+        background: #3e9d3b;
+        transform: scale(1.05);
+    }
+
+    .strike-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .strike-count {
+        font-size: 1.5em;
+        margin: 10px 0;
+        color: #c0392b;
+    }
+
+    .message-area {
+        text-align: center;
+        font-size: 1.3em;
+        color: #e74c3c;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .round-score {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 1.2em;
+        color: #333;
+    }
+
+    @media (max-width: 600px) {
+        .answer-box {
+            width: 90%;
+            height: 100px;
+            font-size: 0.9em;
+        }
+        .answer-front {
+            font-size: 2em;
+        }
+    }
+</style>
+</head>
+<body>
+
+<h1>Leave No Trace</h1>
+
+<div class="scoreboard" id="scoreboard"></div>
+
+<div class="round-container">
+    <div class="round-header">
+        <h2 id="round-title">Round 1 - Seven Principles of Leave No Trace</h2>
+    </div>
+    <div id="answers-container"></div>
+    <div class="round-score" id="round-score-display"></div>
+    <div class="round-navigation">
+        <button onclick="previousRound()">Previous Round</button>
+        <button onclick="nextRound()">Next Round</button>
+        <button onclick="resetAnswers()">Reset Answers</button>
+        <button onclick="resetCurrentRoundScore()">Reset Current Round Score</button>
+        <button onclick="addStrike()" id="strike-button">Strike (X)</button>
+    </div>
+    <div class="strike-container">
+        <div class="strike-count" id="strike-count">Strikes: 0</div>
+    </div>
+    <div class="message-area" id="message-area"></div>
+</div>
+
+<audio id="reveal-sound" src="ding.mp3" preload="auto"></audio>
+<audio id="buzz-sound" src="buzz.mp3" preload="auto"></audio>
+
+<script>
+    const roundTitles = [
+        "Round 1 - Seven Principles of Leave No Trace",
+        "Round 2 - Planning Ahead",
+        "Round 3 - Durable Surfaces",
+        "Round 4 - Waste Disposal",
+        "Round 5 - Leave What You Find",
+        "Round 6 - Respect Wildlife",
+        "Round 7 - Campfire",
+        "Round 8 - Be Considerate of Others"
+    ];
+
+    const roundData = [
+        [
+            {answer: "Plan Ahead and Prepare", score: 30},
+            {answer: "Travel and Camp on Durable Surfaces", score: 25},
+            {answer: "Dispose of Waste Properly", score: 20},
+            {answer: "Leave What You Find", score: 15},
+            {answer: "Minimize Campfire Impacts", score: 10},
+            {answer: "Respect Wildlife", score: 5},
+            {answer: "Be Considerate of Other Visitors", score: 3}
+        ],
+        [
+            {answer: "Select Your Location", score: 30},
+            {answer: "Review and Prepare for Weather", score: 25},
+            {answer: "Gather and Organize Equipment", score: 20},
+            {answer: "Plan Your Meals", score: 15},
+            {answer: "Reduce Group Size and Review Regulations", score: 10},
+            {answer: "Use Map and Compass (Don’t Mark the Path)", score: 5},
+            {answer: "Review Terrain", score: 3}
+        ],
+        [
+            {answer: "Existing Campsite", score: 30},
+            {answer: "Rock, Sand, Gravel", score: 25},
+            {answer: "Dirt", score: 20},
+            {answer: "Non-Durable: Vegetation", score: 15},
+            {answer: "Non-Durable: Mud Puddles", score: 10}
+        ],
+        [
+            {answer: "Pack It In / Pack It Out", score: 30},
+            {answer: "Latrine (6-8 inches deep)", score: 25},
+            {answer: "At Least 75 Paces from Water, Camp, and Trails", score: 20},
+            {answer: "Clean Up Camp Before Leaving", score: 15},
+            {answer: "Use a Sump", score: 10}
+        ],
+        [
+            {answer: "Leave Natural Objects and Artifacts", score: 30},
+            {answer: "Avoid Damage to Trees and Plants", score: 25},
+            {answer: "Don’t Build Structures or Dig Trenches", score: 20},
+            {answer: "Don’t Introduce Non-Native Species", score: 15}
+        ],
+        [
+            {answer: "Observe Wildlife from a Distance", score: 30},
+            {answer: "Never Feed Animals", score: 25},
+            {answer: "Avoid Wildlife During Sensitive Times", score: 20},
+            {answer: "Control Pets or Leave Them at Home", score: 15},
+            {answer: "Hang Bear Bag", score: 10}
+        ],
+        [
+            {answer: "Use Established Fire Rings", score: 30},
+            {answer: "Use a Lightweight Stove for Cooking", score: 25},
+            {answer: "Keep Fires Small", score: 20},
+            {answer: "Burn All Fires to Ash", score: 15},
+            {answer: "Put Fires Out Completely", score: 10},
+            {answer: "Scatter Ashes When Cool", score: 5}
+        ],
+        [
+            {answer: "Limit Excessive Noise", score: 30},
+            {answer: "Choose a Site Away from Trails", score: 25},
+            {answer: "Keep Pets Under Control", score: 20},
+            {answer: "Horses Have the Right of Way", score: 15},
+            {answer: "Bikes Give Way to Hikers and Horses", score: 10},
+            {answer: "Avoid Blocking the Trail", score: 5}
+        ]
+    ];
+
+    let numberOfTeams = 1; 
+    let teamNames = [];
+    let teamGameScores = []; 
+    let teamRoundScores = [];
+    let currentRound = 0;
+    let strikes = 0;
+    let controllingTeam = 0; 
+    let stealingTeam = null; 
+    let roundAnswersRevealed = [];
+    let roundOver = false;
+    let singleTeamMode = false;
+    let initialControllingTeam = 0; 
+    let roundStartGameScores = [];
+    let roundStartRoundScores = [];
+
+    const revealSound = document.getElementById('reveal-sound');
+    const buzzSound = document.getElementById('buzz-sound');
+    const scoreboard = document.getElementById('scoreboard');
+    const messageArea = document.getElementById('message-area');
+    const strikeCountEl = document.getElementById('strike-count');
+    const roundScoreDisplay = document.getElementById('round-score-display');
+    const strikeButton = document.getElementById('strike-button');
+
+    window.addEventListener('load', () => {
+        numberOfTeams = parseInt(prompt("How many teams are playing? (1 or 2)", "2"), 10);
+        if (numberOfTeams !== 1 && numberOfTeams !== 2) {
+            numberOfTeams = 1;
+        }
+
+        if (numberOfTeams === 1) {
+            singleTeamMode = true;
+            let teamAName = prompt("What is the name of the team?", "Team A") || "Team A";
+            teamNames = [teamAName];
+            teamGameScores = [0];
+            teamRoundScores = [0];
+            buildScoreboard();
+            controllingTeam = 0;
+            initialControllingTeam = 0;
+            loadRound();
+            updateUI();
+        } else {
+            let teamAName = prompt("What is the name of Team A?", "Team A") || "Team A";
+            let teamBName = prompt("What is the name of Team B?", "Team B") || "Team B";
+            teamNames = [teamAName, teamBName];
+            teamGameScores = [0,0];
+            teamRoundScores = [0,0];
+            buildScoreboard();
+
+            let teamAGuess = parseInt(prompt(teamAName + ", guess a number between 1 and 10."),10);
+            let teamBGuess = parseInt(prompt(teamBName + ", guess a number between 1 and 10."),10);
+            if (isNaN(teamAGuess) || teamAGuess < 1 || teamAGuess > 10) teamAGuess = 5;
+            if (isNaN(teamBGuess) || teamBGuess < 1 || teamBGuess > 10) teamBGuess = 5;
+
+            let revealButton = document.createElement('button');
+            revealButton.textContent = "Reveal Random Number";
+            revealButton.style.marginTop = "20px";
+            revealButton.onclick = () => {
+                let randomNum = Math.floor(Math.random()*10)+1;
+                alert("The random number is: " + randomNum);
+                let diffA = Math.abs(teamAGuess - randomNum);
+                let diffB = Math.abs(teamBGuess - randomNum);
+                if (diffA < diffB) {
+                    controllingTeam = 0;
+                } else if (diffB < diffA) {
+                    controllingTeam = 1;
+                } else {
+                    controllingTeam = Math.round(Math.random());
+                }
+                initialControllingTeam = controllingTeam;
+                scoreboard.removeChild(revealButton);
+                loadRound();
+                updateUI();
+            };
+            scoreboard.appendChild(revealButton);
+        }
+    });
+
+    function buildScoreboard() {
+        scoreboard.innerHTML = '';
+        for (let i=0; i<numberOfTeams; i++) {
+            let teamDiv = document.createElement('div');
+            teamDiv.className = 'team';
+            let h2 = document.createElement('h2');
+            h2.textContent = teamNames[i];
+            teamDiv.appendChild(h2);
+
+            let gameScoreEl = document.createElement('div');
+            gameScoreEl.className = 'team-score';
+            gameScoreEl.id = `team${i}-game-score`;
+            gameScoreEl.textContent = `Total: ${teamGameScores[i]}`;
+            teamDiv.appendChild(gameScoreEl);
+
+            let roundScoreEl = document.createElement('div');
+            roundScoreEl.className = 'team-score';
+            roundScoreEl.id = `team${i}-round-score`;
+            roundScoreEl.textContent = `Round: ${teamRoundScores[i]}`;
+            teamDiv.appendChild(roundScoreEl);
+
+            if (!singleTeamMode) {
+                let controlIndicator = document.createElement('div');
+                controlIndicator.className = 'control-indicator';
+                controlIndicator.id = `team${i}-control`;
+                controlIndicator.textContent = '';
+                teamDiv.appendChild(controlIndicator);
+            }
+
+            scoreboard.appendChild(teamDiv);
+        }
+    }
+
+    function storeRoundStartScores() {
+        roundStartGameScores = teamGameScores.slice();
+        roundStartRoundScores = teamRoundScores.slice();
+    }
+
+    function loadRound() {
+        storeRoundStartScores();
+        roundOver = false;
+        strikes = 0;
+        roundAnswersRevealed = [];
+        stealingTeam = null; // Reset stealing team at start of round
+        for (let i=0; i<teamRoundScores.length; i++) {
+            teamRoundScores[i] = 0; 
+        }
+        messageArea.textContent = '';
+        updateStrikeDisplay();
+        updateRoundScoreDisplay();
+
+        const roundTitle = document.getElementById('round-title');
+        roundTitle.textContent = roundTitles[currentRound];
+
+        const answersContainer = document.getElementById('answers-container');
+        answersContainer.innerHTML = '';
+        const answers = roundData[currentRound];
+
+        answers.forEach((item, index) => {
+            const box = document.createElement('div');
+            box.className = 'answer-box';
+            const inner = document.createElement('div');
+            inner.className = 'answer-inner';
+
+            const front = document.createElement('div');
+            front.className = 'answer-front';
+            front.textContent = index + 1; 
+
+            const back = document.createElement('div');
+            back.className = 'answer-back';
+            back.textContent = ''; 
+
+            inner.appendChild(front);
+            inner.appendChild(back);
+            box.appendChild(inner);
+
+            box.addEventListener('click', () => {
+                revealAnswer(box, item.answer, item.score);
+            });
+
+            answersContainer.appendChild(box);
+        });
+
+        if (singleTeamMode) {
+            strikeButton.style.display = 'none';
+        } else {
+            strikeButton.style.display = 'inline-block';
+        }
+        updateUI();
+    }
+
+    function revealAnswer(box, answerText, answerScore) {
+        if (box.classList.contains('revealed')) {
+            // Already revealed, do nothing
+            return;
+        }
+        box.classList.add('revealed');
+        const back = box.querySelector('.answer-back');
+        back.textContent = `${answerText} - ${answerScore}`;
+        if (revealSound) {
+            revealSound.currentTime = 0;
+            revealSound.play();
+        }
+        roundAnswersRevealed.push({answerText, answerScore});
+
+        if (!roundOver) {
+            // Only add points if round is not over
+            if (singleTeamMode) {
+                teamRoundScores[0] += answerScore;
+            } else {
+                if (stealingTeam === null) {
+                    // Controlling team guessing
+                    teamRoundScores[controllingTeam] += answerScore;
+                } else {
+                    // Stealing team got a correct answer -> they steal the pot
+                    teamRoundScores[stealingTeam] += getRoundPot();
+                    endRound(stealingTeam);
+                    updateUI();
+                    return;
+                }
+            }
+
+            checkIfRoundComplete();
+        }
+        updateRoundScoreDisplay();
+        updateUI();
+    }
+
+    function addStrike() {
+        if (singleTeamMode || roundOver) return; 
+        strikes++;
+        if (buzzSound) {
+            buzzSound.currentTime = 0;
+            buzzSound.play();
+        }
+        updateStrikeDisplay();
+
+        if (stealingTeam === null) {
+            if (strikes >= 3) {
+                let otherTeam = (controllingTeam === 0)?1:0;
+                messageArea.textContent = `${teamNames[otherTeam]} gets to try to steal the round! Reveal one correct answer to steal the points, or get it wrong and ${teamNames[controllingTeam]} keeps them.`;
+                stealingTeam = otherTeam;
+            }
+        } else {
+            // Stealing team got a strike
+            endRound(controllingTeam);
+        }
+    }
+
+    function checkIfRoundComplete() {
+        const answers = roundData[currentRound];
+        const allRevealed = roundAnswersRevealed.length === answers.length;
+        if (allRevealed && stealingTeam === null) {
+            endRound(controllingTeam);
+        }
+    }
+
+    function endRound(winningTeamIndex) {
+        roundOver = true;
+        // Award round points to winning team
+        if (!singleTeamMode) {
+            teamGameScores[winningTeamIndex] += getRoundPot();
+        } else {
+            teamGameScores[0] += getRoundPot();
+        }
+        stealingTeam = null;
+        updateUI();
+        messageArea.textContent = `${teamNames[winningTeamIndex]} wins the round! You can reveal remaining answers without adding points.`;
+    }
+
+    function getRoundPot() {
+        return roundAnswersRevealed.reduce((sum,a)=>sum+a.answerScore,0);
+    }
+
+    function updateStrikeDisplay() {
+        strikeCountEl.textContent = `Strikes: ${strikes}`;
+    }
+
+    function updateRoundScoreDisplay() {
+        // Renamed to "Current Round Points"
+        roundScoreDisplay.textContent = `Current Round Points: ${getRoundPot()}`;
+    }
+
+    function updateUI() {
+        for (let i=0; i<numberOfTeams; i++) {
+            document.getElementById(`team${i}-game-score`).textContent = `Total: ${teamGameScores[i]}`;
+            document.getElementById(`team${i}-round-score`).textContent = `Round: ${teamRoundScores[i]}`;
+        }
+
+        if (!singleTeamMode) {
+            for (let i=0; i<numberOfTeams; i++) {
+                let controlIndicator = document.getElementById(`team${i}-control`);
+                if (controlIndicator) {
+                    if (roundOver) {
+                        // Round ended, no team in control or stealing
+                        controlIndicator.textContent = "";
+                    } else if (stealingTeam === i) {
+                        controlIndicator.textContent = "★ Stealing ★";
+                    } else if (stealingTeam === null && i === controllingTeam) {
+                        controlIndicator.textContent = "★ In Control ★";
+                    } else {
+                        controlIndicator.textContent = "";
+                    }
+                }
+            }
+        }
+    }
+
+    function resetAnswers() {
+        // Reload the current round (this will clear everything)
+        loadRound();
+    }
+
+    function resetCurrentRoundScore() {
+        teamGameScores = roundStartGameScores.slice();
+        teamRoundScores = roundStartRoundScores.slice();
+        updateUI();
+    }
+
+    function nextRound() {
+        if (currentRound < roundData.length - 1) {
+            currentRound++;
+            // Alternate controlling team if multiple teams
+            if (!singleTeamMode) {
+                controllingTeam = (controllingTeam === 0)?1:0;
+            }
+            loadRound();
+        }
+    }
+
+    function previousRound() {
+        if (currentRound > 0) {
+            currentRound--;
+            // Alternate controlling team if multiple teams
+            if (!singleTeamMode) {
+                controllingTeam = (controllingTeam === 0)?1:0;
+            }
+            loadRound();
+        }
+    }
+</script>
+</body>
+</html>
