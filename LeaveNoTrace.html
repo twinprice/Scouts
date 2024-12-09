@@ -15,6 +15,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        position: relative;
     }
 
     h1, h2, h3 {
@@ -208,6 +209,36 @@
         color: #333;
     }
 
+    /* Winner modal */
+    .winner-modal {
+        position: fixed;
+        top: 0;
+        left:0;
+        width:100%;
+        height:100%;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        justify-content:center;
+        align-items:center;
+        text-align:center;
+    }
+
+    .winner-content {
+        background: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        color:#333;
+        font-size:2em;
+        font-weight:bold;
+        box-shadow:0 0 10px rgba(0,0,0,0.5);
+        animation: popIn 0.5s ease;
+    }
+
+    @keyframes popIn {
+        0% {transform:scale(0.5);opacity:0;}
+        100% {transform:scale(1);opacity:1;}
+    }
+
     @media (max-width: 600px) {
         .answer-box {
             width: 90%;
@@ -238,11 +269,18 @@
         <button onclick="resetAnswers()">Reset Answers</button>
         <button onclick="resetCurrentRoundScore()">Reset Current Round Score</button>
         <button onclick="addStrike()" id="strike-button">Strike (X)</button>
+        <button onclick="endGame()">End Game</button>
     </div>
     <div class="strike-container">
         <div class="strike-count" id="strike-count">Strikes: 0</div>
     </div>
     <div class="message-area" id="message-area"></div>
+</div>
+
+<div class="winner-modal" id="winner-modal">
+    <div class="winner-content" id="winner-content">
+        <!-- Winner will be shown here -->
+    </div>
 </div>
 
 <audio id="reveal-sound" src="ding.mp3" preload="auto"></audio>
@@ -338,6 +376,7 @@
     let initialControllingTeam = 0; 
     let roundStartGameScores = [];
     let roundStartRoundScores = [];
+    let gameEnded = false;
 
     const revealSound = document.getElementById('reveal-sound');
     const buzzSound = document.getElementById('buzz-sound');
@@ -346,6 +385,9 @@
     const strikeCountEl = document.getElementById('strike-count');
     const roundScoreDisplay = document.getElementById('round-score-display');
     const strikeButton = document.getElementById('strike-button');
+
+    const winnerModal = document.getElementById('winner-modal');
+    const winnerContent = document.getElementById('winner-content');
 
     window.addEventListener('load', () => {
         numberOfTeams = parseInt(prompt("How many teams are playing? (1 or 2)", "2"), 10);
@@ -440,11 +482,12 @@
     }
 
     function loadRound() {
+        if (gameEnded) return;
         storeRoundStartScores();
         roundOver = false;
         strikes = 0;
         roundAnswersRevealed = [];
-        stealingTeam = null; // Reset stealing team at start of round
+        stealingTeam = null; 
         for (let i=0; i<teamRoundScores.length; i++) {
             teamRoundScores[i] = 0; 
         }
@@ -494,8 +537,7 @@
 
     function revealAnswer(box, answerText, answerScore) {
         if (box.classList.contains('revealed')) {
-            // Already revealed, do nothing
-            return;
+            return; 
         }
         box.classList.add('revealed');
         const back = box.querySelector('.answer-back');
@@ -506,13 +548,12 @@
         }
         roundAnswersRevealed.push({answerText, answerScore});
 
-        if (!roundOver) {
-            // Only add points if round is not over
+        // Only add points if round not over
+        if (!roundOver && !gameEnded) {
             if (singleTeamMode) {
                 teamRoundScores[0] += answerScore;
             } else {
                 if (stealingTeam === null) {
-                    // Controlling team guessing
                     teamRoundScores[controllingTeam] += answerScore;
                 } else {
                     // Stealing team got a correct answer -> they steal the pot
@@ -530,7 +571,7 @@
     }
 
     function addStrike() {
-        if (singleTeamMode || roundOver) return; 
+        if (singleTeamMode || roundOver || gameEnded) return; 
         strikes++;
         if (buzzSound) {
             buzzSound.currentTime = 0;
@@ -560,7 +601,6 @@
 
     function endRound(winningTeamIndex) {
         roundOver = true;
-        // Award round points to winning team
         if (!singleTeamMode) {
             teamGameScores[winningTeamIndex] += getRoundPot();
         } else {
@@ -580,7 +620,6 @@
     }
 
     function updateRoundScoreDisplay() {
-        // Renamed to "Current Round Points"
         roundScoreDisplay.textContent = `Current Round Points: ${getRoundPot()}`;
     }
 
@@ -594,8 +633,9 @@
             for (let i=0; i<numberOfTeams; i++) {
                 let controlIndicator = document.getElementById(`team${i}-control`);
                 if (controlIndicator) {
-                    if (roundOver) {
-                        // Round ended, no team in control or stealing
+                    if (gameEnded) {
+                        controlIndicator.textContent = "";
+                    } else if (roundOver) {
                         controlIndicator.textContent = "";
                     } else if (stealingTeam === i) {
                         controlIndicator.textContent = "★ Stealing ★";
@@ -610,20 +650,21 @@
     }
 
     function resetAnswers() {
-        // Reload the current round (this will clear everything)
+        if (gameEnded) return;
         loadRound();
     }
 
     function resetCurrentRoundScore() {
+        if (gameEnded) return;
         teamGameScores = roundStartGameScores.slice();
         teamRoundScores = roundStartRoundScores.slice();
         updateUI();
     }
 
     function nextRound() {
+        if (gameEnded) return;
         if (currentRound < roundData.length - 1) {
             currentRound++;
-            // Alternate controlling team if multiple teams
             if (!singleTeamMode) {
                 controllingTeam = (controllingTeam === 0)?1:0;
             }
@@ -632,14 +673,35 @@
     }
 
     function previousRound() {
+        if (gameEnded) return;
         if (currentRound > 0) {
             currentRound--;
-            // Alternate controlling team if multiple teams
             if (!singleTeamMode) {
                 controllingTeam = (controllingTeam === 0)?1:0;
             }
             loadRound();
         }
+    }
+
+    function endGame() {
+        // Determine winning team
+        gameEnded = true;
+        let winnerText = "";
+        if (singleTeamMode) {
+            // Only one team
+            winnerText = `${teamNames[0]} Wins the Game!`;
+        } else {
+            if (teamGameScores[0] > teamGameScores[1]) {
+                winnerText = `${teamNames[0]} Wins the Game!`;
+            } else if (teamGameScores[1] > teamGameScores[0]) {
+                winnerText = `${teamNames[1]} Wins the Game!`;
+            } else {
+                winnerText = "It's a Tie!";
+            }
+        }
+
+        winnerContent.textContent = winnerText;
+        winnerModal.style.display = "flex";
     }
 </script>
 </body>
