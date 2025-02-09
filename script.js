@@ -1,5 +1,8 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://twinprice.github.io/Scouts/scouts_v2.json";  // URL to your JSON file
+const DATA_URL = "https://twinprice.github.io/Scouts/scouts.json";  // URL to your JSON file
+
+// Ensure the title remains correct
+document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form";
 
 // Function to get query parameter from URL
 function getQueryParam(param) {
@@ -22,13 +25,18 @@ async function fetchScoutData() {
 // Initialize page logic
 document.addEventListener("DOMContentLoaded", async () => {
     const loginId = getQueryParam("id");
+    console.log("Extracted login ID:", loginId);  // Debugging output
+
     if (!loginId) {
         document.getElementById("container").innerHTML = "<p>Invalid or missing scout identifier.</p>";
         return;
     }
 
     const scouts = await fetchScoutData();
-    const scout = scouts.find(s => s.login_id === loginId);
+    console.log("Loaded scouts:", scouts);  // Debugging output
+
+    const scout = scouts.find(s => s.login_id.trim() === loginId.trim());
+    console.log("Matched scout:", scout);  // Debugging output
 
     if (!scout) {
         document.getElementById("container").innerHTML = "<p>Scout not found.</p>";
@@ -36,8 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     document.getElementById("scout-name").textContent = `Scout: ${scout.name}`;
-
     document.getElementById("login-btn").addEventListener("click", () => {
+        document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form"; // Ensure the title stays after login
         const enteredPassword = document.getElementById("password").value;
         if (enteredPassword !== SHARED_PASSWORD) {
             document.getElementById("login-error").textContent = "Incorrect password. Please try again.";
