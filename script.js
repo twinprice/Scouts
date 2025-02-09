@@ -1,6 +1,16 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://twinprice.github.io/Scouts/scouts.json";  // URL to your JSON file
+const DATA_URL = "https://twinprice.github.io/Scouts/scouts_v2.json?t=" + new Date().getTime();
 
+async function fetchScoutData() {
+    try {
+        const response = await fetch(DATA_URL);
+        const data = await response.json();
+        return data.scouts;
+    } catch (error) {
+        console.error("Error fetching scout data:", error);
+        return [];
+    }
+}
 // Ensure the title remains correct
 document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form";
 
