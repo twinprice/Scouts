@@ -103,8 +103,14 @@ function populateBadgeSelection(scout) {
         for (let i = 0; i < 4; i++) {
             const select = document.createElement("select");
             select.name = `badge${i+1}`;
+            function getOrdinal(n) {
+                if (n === 1) return "1st";
+                if (n === 2) return "2nd";
+                if (n === 3) return "3rd";
+                return `${n}th`;
+            }
             const defaultOption = document.createElement("option");
-            defaultOption.textContent = `Select ${i+1}st Merit Badge`;
+            defaultOption.textContent = `Select ${getOrdinal(i+1)} Merit Badge`;
             defaultOption.value = "";
             defaultOption.disabled = true;
             defaultOption.selected = true;
