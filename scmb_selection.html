@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scout Merit Badge Selection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <!-- Login Section -->
+        <div id="login-section">
+            <h2>Scout Merit Badge Selection</h2>
+            <p id="scout-name"></p>
+            <label for="password">Enter Password:</label>
+            <input type="password" id="password" placeholder="Shared password">
+            <button id="login-btn">Submit</button>
+            <p id="login-error" class="error-message"></p>
+        </div>
+
+        <!-- Poll Section: Hidden until login -->
+        <div id="poll-section" style="display:none;">
+            <h3>Welcome, <span id="display-name"></span>!</h3>
+            <p>Your Achieved Merit Badges:</p>
+            <div id="achievements"></div>
+            <hr>
+
+            <div id="badge-selection"></div>
+
+            <button id="submit-btn">Submit Selection</button>
+            <p id="submission-status"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
