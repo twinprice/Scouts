@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://twinprice.github.io/Scouts/scouts.json";  // URL to your JSON file
+const DATA_URL = "https://twinprice.github.io/Scouts/scouts_v2.json";  // URL to your JSON file
 
 // Function to get query parameter from URL
 function getQueryParam(param) {
