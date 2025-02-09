@@ -21,21 +21,21 @@ async function fetchScoutData() {
 
 // Initialize page logic
 document.addEventListener("DOMContentLoaded", async () => {
-    const scoutName = getQueryParam("id");
-    if (!scoutName) {
+    const loginId = getQueryParam("id");
+    if (!loginId) {
         document.getElementById("container").innerHTML = "<p>Invalid or missing scout identifier.</p>";
         return;
     }
 
     const scouts = await fetchScoutData();
-    const scout = scouts.find(s => s.name === scoutName);
+    const scout = scouts.find(s => s.login_id === loginId);
 
     if (!scout) {
         document.getElementById("container").innerHTML = "<p>Scout not found.</p>";
         return;
     }
 
-    document.getElementById("scout-name").textContent = `Scout: ${scoutName}`;
+    document.getElementById("scout-name").textContent = `Scout: ${scout.name}`;
 
     document.getElementById("login-btn").addEventListener("click", () => {
         const enteredPassword = document.getElementById("password").value;
@@ -46,16 +46,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         document.getElementById("login-section").style.display = "none";
         document.getElementById("poll-section").style.display = "block";
-        document.getElementById("display-name").textContent = scoutName;
+        document.getElementById("display-name").textContent = scout.name;
 
         populateAchievements(scout);
         populateBadgeSelection(scout);
     });
 });
 
-// Populate earned merit badges
+// Populate earned merit badges (hide for first-year scouts)
 function populateAchievements(scout) {
+    const achievementsSection = document.getElementById("achievements-section");
     const achievementsDiv = document.getElementById("achievements");
+    if (scout.year === "1st") {
+        achievementsSection.style.display = "none";
+        achievementsDiv.style.display = "none";
+        return;
+    }
     achievementsDiv.innerHTML = scout.earned.length > 0 ? scout.earned.join(", ") : "None";
 }
 
@@ -79,6 +85,12 @@ function populateBadgeSelection(scout) {
         for (let i = 0; i < 4; i++) {
             const select = document.createElement("select");
             select.name = `badge${i+1}`;
+            const defaultOption = document.createElement("option");
+            defaultOption.textContent = `Select ${i+1}st Merit Badge`;
+            defaultOption.value = "";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
             scout.available.forEach(badge => {
                 const option = document.createElement("option");
                 option.value = badge;
