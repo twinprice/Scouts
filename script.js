@@ -1,3 +1,4 @@
+let meritBadgeList = [];
 const SHARED_PASSWORD = "secure123";
 const DATA_URL = "https://script.google.com/macros/s/AKfycbwx0a_c24marw82303BN1Lm_LodvHjogUg959YpDn5-48DwZpkCOabL9_9D_jcHxPZF/exec"; // Replace with actual Google Apps Script URL
 
@@ -16,10 +17,17 @@ async function fetchScoutData() {
     try {
         const response = await fetch(`${DATA_URL}?id=${loginId}`);
         const data = await response.json();
+        
         if (data.error) {
             console.error("Scout not found.");
             return null;
         }
+        
+        // If Google Sheets returns a full list of available merit badges, store it
+        if (data.availableBadges) {
+            meritBadgeList = data.availableBadges;
+        }
+        
         return data;
     } catch (error) {
         console.error("Error fetching scout data:", error);
@@ -122,7 +130,6 @@ function populateBadgeSelection(scout) {
         }
     }
 }
-
 // Ensure required field is filled before submission
 function submitSelection() {
     const provoReason = document.getElementById("provo-reason");
