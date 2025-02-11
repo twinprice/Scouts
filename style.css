@@ -67,3 +67,12 @@ hr {
     background: #ccc;
     margin: 20px 0;
 }
+#logo-container {
+    text-align: left; /* Aligns the logo to the left */
+    padding: 10px;
+}
+
+#logo {
+    width: 100px; /* Adjust size as needed */
+    height: auto;
+}
