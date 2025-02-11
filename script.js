@@ -1,16 +1,6 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://twinprice.github.io/Scouts/scouts_v2.json?t=" + new Date().getTime();
+const DATA_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // Replace with actual Google Apps Script URL
 
-async function fetchScoutData() {
-    try {
-        const response = await fetch(DATA_URL);
-        const data = await response.json();
-        return data.scouts;
-    } catch (error) {
-        console.error("Error fetching scout data:", error);
-        return [];
-    }
-}
 // Ensure the title remains correct
 document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form";
 
@@ -20,68 +10,69 @@ function getQueryParam(param) {
     return params.get(param);
 }
 
-// Fetch scout data from JSON file
+// Fetch scout data from Google Sheets
 async function fetchScoutData() {
+    const loginId = getQueryParam("id");
     try {
-        const response = await fetch(DATA_URL);
+        const response = await fetch(`${DATA_URL}?id=${loginId}`);
         const data = await response.json();
-        return data.scouts;
+        if (data.error) {
+            console.error("Scout not found.");
+            return null;
+        }
+        return data;
     } catch (error) {
         console.error("Error fetching scout data:", error);
-        return [];
+        return null;
     }
 }
 
 // Initialize page logic
 document.addEventListener("DOMContentLoaded", async () => {
     const loginId = getQueryParam("id");
-    console.log("Extracted login ID:", loginId);  // Debugging output
-
     if (!loginId) {
         document.getElementById("container").innerHTML = "<p>Invalid or missing scout identifier.</p>";
         return;
     }
 
-    const scouts = await fetchScoutData();
-    console.log("Loaded scouts:", scouts);  // Debugging output
-
-    const scout = scouts.find(s => s.login_id.trim() === loginId.trim());
-    console.log("Matched scout:", scout);  // Debugging output
-
+    const scout = await fetchScoutData();
     if (!scout) {
         document.getElementById("container").innerHTML = "<p>Scout not found.</p>";
         return;
     }
 
-    document.getElementById("scout-name").textContent = `Scout: ${scout.name}`;
-    document.getElementById("login-btn").addEventListener("click", () => {
-        document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form"; // Ensure the title stays after login
-        const enteredPassword = document.getElementById("password").value;
-        if (enteredPassword !== SHARED_PASSWORD) {
-            document.getElementById("login-error").textContent = "Incorrect password. Please try again.";
-            return;
+    document.getElementById("display-name").textContent = scout.name;
+
+    // Add Scout Camp Week Selection
+    const weekSelectionDiv = document.createElement("div");
+    weekSelectionDiv.innerHTML = `
+        <label for="week-select">Select Scout Camp Week:</label>
+        <select id="week-select">
+            <option value="Week 1">Week 1 (June 15 - June 21)</option>
+            <option value="Provo Week">Provo Week (July 13 - July 19)</option>
+        </select>
+        <div id="provo-reason-div" style="display: none;">
+            <label for="provo-reason">Reason for selecting Provo Week (Required):</label>
+            <input type="text" id="provo-reason" placeholder="Enter reason here">
+        </div>
+    `;
+    document.getElementById("poll-section").prepend(weekSelectionDiv);
+
+    // Show text box when "Provo Week" is selected
+    document.getElementById("week-select").addEventListener("change", function() {
+        const provoReasonDiv = document.getElementById("provo-reason-div");
+        if (this.value === "Provo Week") {
+            provoReasonDiv.style.display = "block";
+            document.getElementById("provo-reason").setAttribute("required", "true");
+        } else {
+            provoReasonDiv.style.display = "none";
+            document.getElementById("provo-reason").removeAttribute("required");
         }
-
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("poll-section").style.display = "block";
-        document.getElementById("display-name").textContent = scout.name;
-
-        populateAchievements(scout);
-        populateBadgeSelection(scout);
     });
-});
 
-// Populate earned merit badges (hide for first-year scouts)
-function populateAchievements(scout) {
-    const achievementsSection = document.getElementById("achievements-section");
-    const achievementsDiv = document.getElementById("achievements");
-    if (scout.year === "1st") {
-        achievementsSection.style.display = "none";
-        achievementsDiv.style.display = "none";
-        return;
-    }
-    achievementsDiv.innerHTML = scout.earned.length > 0 ? scout.earned.join(", ") : "None";
-}
+    // Populate Badge Selection
+    populateBadgeSelection(scout);
+});
 
 // Populate merit badge selection
 function populateBadgeSelection(scout) {
@@ -91,38 +82,54 @@ function populateBadgeSelection(scout) {
     if (scout.year === "1st") {
         badgeSelectionDiv.innerHTML = `
             <h3>Required Merit Badges:</h3>
-            <ul>
-                <li>${scout.required.join("</li><li>")}</li>
-            </ul>
+            <p>Environmental Science, First Aid, Swimming</p>
             <h3>Choose One:</h3>
-            <input type="radio" name="optionalBadge" value="${scout.optional[0]}"> ${scout.optional[0]}<br>
-            <input type="radio" name="optionalBadge" value="${scout.optional[1]}"> ${scout.optional[1]}
+            <input type="radio" name="optionalBadge" value="Archery"> Archery<br>
+            <input type="radio" name="optionalBadge" value="Rifle Shooting"> Rifle Shooting<br>
+            <input type="radio" name="optionalBadge" value="Nature"> Nature
         `;
     } else {
-        badgeSelectionDiv.innerHTML = "<h3>Select 4 Merit Badges:</h3>";
-        for (let i = 0; i < 4; i++) {
+        let requiredBadges = [];
+        if (!scout.earned.includes("Cooking")) requiredBadges.push("Cooking");
+        if (!scout.earned.includes("Emergency Preparedness")) requiredBadges.push("Emergency Preparedness");
+
+        if (requiredBadges.length > 0) {
+            badgeSelectionDiv.innerHTML += `<h3>Required Merit Badges:</h3><p>${requiredBadges.join(", ")}</p>`;
+        }
+
+        let availableBadges = meritBadgeList.filter(mb => !scout.earned.includes(mb));
+        badgeSelectionDiv.innerHTML += `<h3>Select 4 Merit Badges:</h3>`;
+
+        for (let i = 0; i < (4 - requiredBadges.length); i++) {
             const select = document.createElement("select");
             select.name = `badge${i+1}`;
-            function getOrdinal(n) {
-                if (n === 1) return "1st";
-                if (n === 2) return "2nd";
-                if (n === 3) return "3rd";
-                return `${n}th`;
-            }
             const defaultOption = document.createElement("option");
-            defaultOption.textContent = `Select ${getOrdinal(i+1)} Merit Badge`;
+            defaultOption.textContent = `Select ${i+1}st Merit Badge`;
             defaultOption.value = "";
             defaultOption.disabled = true;
             defaultOption.selected = true;
             select.appendChild(defaultOption);
-            scout.available.forEach(badge => {
+
+            availableBadges.forEach(badge => {
                 const option = document.createElement("option");
                 option.value = badge;
                 option.textContent = badge;
                 select.appendChild(option);
             });
+
             badgeSelectionDiv.appendChild(select);
             badgeSelectionDiv.appendChild(document.createElement("br"));
         }
     }
+}
+
+// Ensure required field is filled before submission
+function submitSelection() {
+    const provoReason = document.getElementById("provo-reason");
+    if (document.getElementById("week-select").value === "Provo Week" && provoReason.value.trim() === "") {
+        alert("Please enter a reason for selecting Provo Week.");
+        return;
+    }
+    
+    // Submission logic
 }
