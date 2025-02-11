@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     document.getElementById("display-name").textContent = scout.name;
-    
+    document.getElementById("submit-btn").addEventListener("click", submitSelection);
+
     // Display earned merit badges
     if (scout.earned.length > 0) {
         document.getElementById("achievements-section").innerHTML = `<h3>Your Achieved Merit Badges:</h3><p>${scout.earned.join(", ")}</p>`;
@@ -108,3 +109,44 @@ function populateBadgeSelection(scout) {
         }
     }
 }
+function submitSelection() {
+    const provoReason = document.getElementById("provo-reason")?.value || "";
+    const selectedWeek = document.getElementById("week-select").value;
+    const scoutName = document.getElementById("display-name").textContent;
+    const loginId = getQueryParam("id");
+    const selections = document.querySelectorAll("select");
+    
+    const formData = {
+        scoutName: scoutName,
+        loginId: loginId,
+        selectedWeek: selectedWeek,
+        provoReason: selectedWeek === "Provo Week" ? provoReason : "",
+        badge1: selections[0] ? selections[0].value : "",
+        badge2: selections[1] ? selections[1].value : "",
+        badge3: selections[2] ? selections[2].value : "",
+        badge4: selections[3] ? selections[3].value : ""
+    };
+
+    // Prevent submission if Provo Week is selected but no reason is given
+    if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
+        alert("Please provide a reason for selecting Provo Week.");
+        return;
+    }
+
+    fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById("submission-status").textContent = "Selection submitted successfully!";
+    })
+    .catch(error => {
+        console.error("Error submitting selection:", error);
+        document.getElementById("submission-status").textContent = "Error submitting selection.";
+    });
+}
+
