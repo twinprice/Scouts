@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // Replace with actual Google Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbwx0a_c24marw82303BN1Lm_LodvHjogUg959YpDn5-48DwZpkCOabL9_9D_jcHxPZF/exec"; // Replace with actual Google Apps Script URL
 
 // Ensure the title remains correct
 document.title = "Troop 444 2025 Summer Camp Merit Badge Selection Form";
