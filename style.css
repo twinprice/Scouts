@@ -1,78 +1,100 @@
+/* Base Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    text-align: center;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
+/* Container for the main content */
 #container {
-    max-width: 600px;
-    margin: 50px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 50px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Header and Title */
+#page-title {
+  margin-bottom: 20px;
+}
+
+/* Section Headers */
 h2, h3 {
-    color: #333;
+  color: #333;
 }
 
+/* Button Styling */
 button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
-input[type="password"], select {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+/* Input and Select Styling */
+input[type="password"], input[type="text"], select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
+/* Error Message Styling */
 .error-message {
-    color: red;
-    font-size: 0.9em;
-    margin-top: 10px;
+  color: red;
+  font-size: 0.9em;
+  margin-top: 10px;
 }
 
+/* Styling for Login and Poll Sections */
 #login-section, #poll-section {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
 }
 
+/* Badge Selection Dropdowns */
 #badge-selection select {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
+/* Horizontal Rule Styling */
 hr {
-    border: 0;
-    height: 1px;
-    background: #ccc;
-    margin: 20px 0;
+  border: 0;
+  height: 1px;
+  background: #ccc;
+  margin: 20px 0;
 }
+
+/* Logo Container */
 #logo-container {
-    text-align: left; /* Aligns the logo to the left */
-    padding: 10px;
+  text-align: left; /* Aligns the logo to the left */
+  padding: 10px;
 }
 
 #logo {
-    width: 100px; /* Adjust size as needed */
-    height: auto;
+  width: 100px; /* Adjust size as needed */
+  height: auto;
+}
+
+/* New: Week selection and Provo explanation styling */
+#week-selection, #provoExplanation {
+  margin: 20px 0;
+  text-align: left;
 }
