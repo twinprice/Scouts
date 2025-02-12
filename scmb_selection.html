@@ -1,44 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <title>Troop 444 2025 Summer Camp Merit Badge Selection Form</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>Troop 444 2025 Summer Camp Merit Badge Selection Form</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="logo-container">
+  <header id="logo-container">
     <img src="Logo.png" alt="Troop 444 Logo" id="logo">
-    </div>
-    <div id="container">
+  </header>
+  <main id="container">
     <h1 id="page-title">Troop 444 2025 Summer Camp Merit Badge Selection Form</h1>
     
-        <!-- Login Section -->
-        <div id="login-section">
-            <h2>Troop 444 2025 Summer Camp Merit Badge Selection Form</h2>
-            <p id="scout-name"></p>
-            <label for="password">Enter Password:</label>
-            <input type="password" id="password" placeholder="Enter shared password">
-            <button id="login-btn">Submit</button>
-            <p id="login-error" class="error-message"></p>
-        </div>
-
-        <!-- Poll Section: Hidden until login -->
-        <div id="poll-section" style="display:none;">
-            <h3>Welcome, <span id="display-name"></span>!</h3>
-            <div id="achievements-section">
-                <p>Your Achieved Merit Badges:</p>
-                <div id="achievements"></div>
-            </div>
-            <hr>
-
-            <div id="badge-selection"></div>
-
-            <button id="submit-btn">Submit Selection</button>
-            <p id="submission-status"></p>
-        </div>
-    </div>
-    <script src="script.js"></script>
+    <!-- Login Section -->
+    <section id="login-section">
+      <h2>Please Log In</h2>
+      <label for="login-id">Enter Scout ID:</label>
+      <input type="text" id="login-id" placeholder="Enter your Scout ID">
+      <label for="password">Enter Password:</label>
+      <input type="password" id="password" placeholder="Enter shared password">
+      <button id="login-btn">Submit</button>
+      <p id="login-error" class="error-message"></p>
+    </section>
+    
+    <!-- Poll Section: Hidden until login -->
+    <section id="poll-section" style="display: none;">
+      <h3>Welcome, <span id="display-name"></span>!</h3>
+      
+      <div id="achievements-section">
+        <h3>Your Achieved Merit Badges:</h3>
+        <div id="achievements"></div>
+      </div>
+      <hr>
+      
+      <!-- Week Selection -->
+      <div id="week-selection">
+        <label for="weekSelector">Select Camp Week:</label>
+        <select id="weekSelector">
+          <option value="Week 1" selected>Week 1</option>
+          <option value="Provo Week">Provo Week</option>
+        </select>
+      </div>
+      
+      <!-- Provo Week Explanation (hidden by default) -->
+      <div id="provoExplanation" style="display: none;">
+        <label for="provo-reason">Explain your choice for Provo Week:</label>
+        <input type="text" id="provo-reason" placeholder="Enter explanation">
+      </div>
+      
+      <!-- Badge Selection -->
+      <div id="badge-selection"></div>
+      
+      <button id="submit-btn">Submit Selection</button>
+      <p id="submission-status"></p>
+    </section>
+  </main>
+  
+  <script src="script.js"></script>
 </body>
 </html>
