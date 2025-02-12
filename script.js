@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://script.google.com/macros/s/AKfycbwx0a_c24marw82303BN1Lm_LodvHjogUg959YpDn5-48DwZpkCOabL9_9D_jcHxPZF/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbxpq6e6wtvflHogZkS_EODds5OOhyFdfryLx5bVg2789m7HJvadI-e_JVjLmNFuvz8G/exec"; // Replace with your actual Apps Script URL
 
 // Declare meritBadgeList globally
 let meritBadgeList = [];
