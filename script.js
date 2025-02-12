@@ -33,7 +33,7 @@ async function fetchScoutData() {
     }
 }
 
-// Initialize page logic
+// Initialize page logic after the DOM has loaded
 document.addEventListener("DOMContentLoaded", async () => {
     const loginId = getQueryParam("id");
     if (!loginId) {
@@ -47,8 +47,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
+    // Set the scout's display name
     document.getElementById("display-name").textContent = scout.name;
+
+    // Attach click event listener to the submit button
     document.getElementById("submit-btn").addEventListener("click", submitSelection);
+
+    // Attach change event listener to the week selection dropdown
+    // Note: Ensure the element ID in your HTML is "weekSelector"
+    document.getElementById("weekSelector").addEventListener("change", function() {
+        var explanationBox = document.getElementById("provoExplanation");
+        // Check for "Provo Week" to match the value used during submission
+        if (this.value === "Provo Week") {
+            explanationBox.style.display = "block";
+        } else {
+            explanationBox.style.display = "none";
+        }    
+    });
 
     // Display earned merit badges
     if (scout.earned.length > 0) {
@@ -57,11 +72,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("achievements-section").innerHTML = "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
     }
 
-    // Populate badge selection
+    // Populate badge selection based on scout data
     populateBadgeSelection(scout);
 });
 
-// Populate merit badge selection
+// Populate merit badge selection based on scout's year and earned badges
 function populateBadgeSelection(scout) {
     const badgeSelectionDiv = document.getElementById("badge-selection");
     badgeSelectionDiv.innerHTML = "";
@@ -109,9 +124,12 @@ function populateBadgeSelection(scout) {
         }
     }
 }
+
+// Submit the scout's selection
 function submitSelection() {
     const provoReason = document.getElementById("provo-reason")?.value || "";
-    const selectedWeek = document.getElementById("week-select").value;
+    // Use the "weekSelector" element consistently
+    const selectedWeek = document.getElementById("weekSelector").value;
     const scoutName = document.getElementById("display-name").textContent;
     const loginId = getQueryParam("id");
     const selections = document.querySelectorAll("select");
@@ -120,6 +138,7 @@ function submitSelection() {
         scoutName: scoutName,
         loginId: loginId,
         selectedWeek: selectedWeek,
+        // Check for "Provo Week" to determine if a reason is required
         provoReason: selectedWeek === "Provo Week" ? provoReason : "",
         badge1: selections[0] ? selections[0].value : "",
         badge2: selections[1] ? selections[1].value : "",
@@ -127,13 +146,13 @@ function submitSelection() {
         badge4: selections[3] ? selections[3].value : ""
     };
 
-    // Prevent submission if Provo Week is selected but no reason is given
+    // Prevent submission if "Provo Week" is selected but no reason is provided
     if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
         alert("Please provide a reason for selecting Provo Week.");
         return;
     }
 
-    fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", {
+    fetch("https://script.google.com/macros/s/AKfycbwx0a_c24marw82303BN1Lm_LodvHjogUg959YpDn5-48DwZpkCOabL9_9D_jcHxPZF/exec", {  // Replace with your actual Apps Script URL for POST
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -149,4 +168,3 @@ function submitSelection() {
         document.getElementById("submission-status").textContent = "Error submitting selection.";
     });
 }
-
