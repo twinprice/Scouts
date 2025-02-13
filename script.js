@@ -136,7 +136,7 @@ function login() {
         "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
     }
     populateBadgeSelection(scout);
-    meritBadgeList = scout.availableBadges || [];
+    meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
 
   });
 }
