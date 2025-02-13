@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://script.google.com/macros/s/AKfycbxpq6e6wtvflHogZkS_EODds5OOhyFdfryLx5bVg2789m7HJvadI-e_JVjLmNFuvz8G/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbx_Xzj7qhq1_aqKgYZD_IYTtD1-o9C2rQTwSih_HrROKxFL-4b1yd2y6YS8Q71y29BQ/exec"; // Replace with your actual Apps Script URL
 
 // Declare meritBadgeList globally
 let meritBadgeList = [];
@@ -163,7 +163,7 @@ function submitSelection() {
     return;
   }
 
-  fetch("https://script.google.com/macros/s/AKfycbxpq6e6wtvflHogZkS_EODds5OOhyFdfryLx5bVg2789m7HJvadI-e_JVjLmNFuvz8G/exec", {  // Replace with your actual Apps Script URL for POST
+  fetch("https://script.google.com/macros/s/AKfycbx_Xzj7qhq1_aqKgYZD_IYTtD1-o9C2rQTwSih_HrROKxFL-4b1yd2y6YS8Q71y29BQ/exec", {  // Replace with your actual Apps Script URL for POST
     method: "POST",
     headers: {
       "Content-Type": "application/json"
