@@ -16,7 +16,11 @@ const CAMP_BADGES = [
 // Declare meritBadgeList globally
 let meritBadgeList = [];
 let currentScout = null;
-
+function getOrdinal(n) {
+  let s = ["th", "st", "nd", "rd"],
+      v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
 // Fetch scout data from Google Sheets using provided scout ID and password
 // JSONP version to bypass CORS
 function fetchScoutDataJSONP(loginId, password, callback) {
@@ -73,15 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Attach change event listener for week selection in the poll section
-  document.getElementById("weekSelector").addEventListener("change", function() {
-    var explanationBox = document.getElementById("provoExplanation");
-    // If "Provo Week" is selected, show the explanation input; otherwise, hide it
-    if (this.value === "Provo Week") {
-      explanationBox.style.display = "block";
-    } else {
-      explanationBox.style.display = "none";
-    }
-  });
+ document.getElementById("weekSelector").addEventListener("change", function() {
+  var explanationBox = document.getElementById("provoExplanation");
+  var explanationInput = document.getElementById("provo-reason");
+  if (this.value === "Provo Week") {
+    explanationBox.style.display = "block";
+    explanationInput.setAttribute("required", "required");
+  } else {
+    explanationBox.style.display = "none";
+    explanationInput.removeAttribute("required");
+  }
+});
 
   // Attach event listener for submission of the badge selection
   document.getElementById("submit-btn").addEventListener("click", submitSelection);
@@ -177,7 +183,7 @@ for (let i = 0; i < numDropdowns; i++) {
       const select = document.createElement("select");
       select.name = `badge${i+1}`;
       const defaultOption = document.createElement("option");
-      defaultOption.textContent = `Select ${i+1}st Merit Badge`;
+      defaultOption.textContent = `Select ${getOrdinal(i+1)} Merit Badge`;
       defaultOption.value = "";
       defaultOption.disabled = true;
       defaultOption.selected = true;
@@ -202,29 +208,27 @@ function submitSelection() {
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
   const loginId = document.getElementById("login-id").value.trim();
-  
+  const selections = document.querySelectorAll("#badge-selection select");
+
+  // Build the final badges array as before:
   let finalBadges = [];
   
   if (currentScout) {
     if (currentScout.year === "1st") {
-      // For 1st years, add the required badges...
+      // For first-year scouts, required badges are fixed
       finalBadges = ["Environmental Science", "First Aid", "Swimming"];
-      // And then add the optional badge from the radio buttons (if any)
+      // Plus the optional badge from radio buttons:
       const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
       if (optionalRadio && optionalRadio.value) {
         finalBadges.push(optionalRadio.value);
       }
     } else {
-      // For older scouts, determine required badges (e.g. Cooking and Emergency Preparedness if not earned)
+      // For older scouts, start with required badges (if needed)
       let requiredBadges = [];
       if (!currentScout.earned.includes("Cooking")) requiredBadges.push("Cooking");
       if (!currentScout.earned.includes("Emergency Preparedness")) requiredBadges.push("Emergency Preparedness");
-      
-      // Start the final list with the required badges.
       finalBadges = requiredBadges.slice();
-      
-      // Get additional selections from the dropdowns.
-      const selections = document.querySelectorAll("#badge-selection select");
+      // And then add selections from dropdowns:
       selections.forEach(select => {
         if (select.value) {
           finalBadges.push(select.value);
@@ -233,31 +237,42 @@ function submitSelection() {
     }
   }
   
-  // Build the form data object.
-  const formData = {
-    scoutName: scoutName,
-    loginId: loginId,
-    selectedWeek: selectedWeek,
-    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
-    finalBadges: finalBadges  // send the final badge array
-  };
-  
-  // Validate that a reason is provided if Provo Week is selected.
+  // Validate that if Provo Week is selected, a reason is provided.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
   }
   
+  // Build form data object.
+  const formData = {
+    scoutName: scoutName,
+    loginId: loginId,
+    selectedWeek: selectedWeek,
+    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
+    finalBadges: finalBadges  // pass the final array
+  };
+  
+  // Submit the form via POST (using no-cors for now)
   fetch(DATA_URL, {
     method: "POST",
-    mode: "no-cors",  // Using no-cors since our endpoint is not setting CORS headers.
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(formData)
   })
   .then(() => {
-    document.getElementById("submission-status").textContent = "Selection submitted successfully!";
+    // Hide the poll section and display the completion page with details
+    document.getElementById("poll-section").style.display = "none";
+    let details = `<p><strong>Scout Name:</strong> ${formData.scoutName}</p>
+                   <p><strong>Login ID:</strong> ${formData.loginId}</p>
+                   <p><strong>Selected Week:</strong> ${formData.selectedWeek}</p>`;
+    if(formData.provoReason) {
+      details += `<p><strong>Explanation:</strong> ${formData.provoReason}</p>`;
+    }
+    details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
+    document.getElementById("submission-details").innerHTML = details;
+    document.getElementById("completion-page").style.display = "block";
   })
   .catch(error => {
     console.error("Error submitting selection:", error);
