@@ -136,15 +136,20 @@ function login() {
     document.getElementById("login-section").style.display = "none";
     document.getElementById("poll-section").style.display = "block";
     document.getElementById("display-name").textContent = scout.name;
-    if (scout.earned && scout.earned.length > 0) {
-      document.getElementById("achievements-section").innerHTML =
-        `<h3>Your Earned Merit Badges</h3><br>
-        <h4> (* denotes Eagle Required Merit Badges):</h4><p>${scout.earned.join(", ")}</p>`;
-    } else {
-      document.getElementById("achievements-section").innerHTML =
-        "<h3>Your Earned Merit Badges:</h3><br>
-        <h4>(* denotes Eagle Required Merit Badges)</h4><p>None</p>";
-    }
+   if (scout.earned && scout.earned.length > 0) {
+  document.getElementById("achievements-section").innerHTML =
+    `<h3>Your Earned Merit Badges</h3>
+    <br>
+    <h4><small><em>(* denotes Eagle Required Merit Badges):</em></small></h4>
+    <p>${scout.earned.join(", ")}</p>`;
+} else {
+  document.getElementById("achievements-section").innerHTML =
+    `<h3>Your Earned Merit Badges:</h3>
+    <br>
+    <h4><small><em>(* denotes Eagle Required Merit Badges)</em></small></h4>
+    <p>None</p>`;
+}
+    
 // Update global meritBadgeList from the returned data (filtered to camp badges)
 currentScout = scout;
 meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
