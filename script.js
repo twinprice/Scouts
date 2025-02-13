@@ -170,7 +170,7 @@ function populateBadgeSelection(scout) {
   } else {
     let requiredBadges = [];
     if (!scout.earned.includes("Cooking*")) requiredBadges.push("Cooking*");
-    if (!scout.earned.includes("Emergency Preparedness*")) requiredBadges.push("Emergency Preparedness*");
+    if (!scout.earned.includes("Emergency Prep*")) requiredBadges.push("Emergency Prep*");
 
     if (requiredBadges.length > 0) {
       badgeSelectionDiv.innerHTML += `<h3>Required Merit Badges:</h3><p>${requiredBadges.join(", ")}</p>`;
@@ -226,7 +226,7 @@ function submitSelection() {
       // For older scouts, start with required badges (if needed)
       let requiredBadges = [];
       if (!currentScout.earned.includes("Cooking*")) requiredBadges.push("Cooking*");
-      if (!currentScout.earned.includes("Emergency Preparedness*")) requiredBadges.push("Emergency Preparedness*");
+      if (!currentScout.earned.includes("Emergency Prep*")) requiredBadges.push("Emergency Prep*");
       finalBadges = requiredBadges.slice();
       // And then add selections from dropdowns:
       selections.forEach(select => {
