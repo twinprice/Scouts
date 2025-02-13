@@ -1,6 +1,17 @@
 const SHARED_PASSWORD = "secure123";
 const DATA_URL = "https://script.google.com/macros/s/AKfycby_Reglu0U16qkbUojoA3-685XAcTlpvzxJj0tASSt-8ycAjCrwFKVjONMDHT_2ncVV/exec"; // Replace with your actual Apps Script URL
-
+const CAMP_BADGES = [
+  “Amer. Heritage”, “Animation”, “Archery”, “Art”, “Astronomy”, “Basketry”, “Camping”, 
+  “Canoeing”, “Chemistry”, “Chess”, “Cit. in Comm.”, “Cit. in Nation”, “Cit. in World”, 
+  “Climbing”, “Communication”, “Cooking”, “Emergency Preparedness”, “Engineering”, 
+  “Enviro. Science”, “First Aid”, “Fish and Wildlife”, “Fishing/Fly Fishing”, “Forestry”, 
+  “Geocaching”, “Geology”, “Graphic Arts”, “Indian Lore”, “Insect Study”, “Kayaking”, 
+  “Leatherwork”, “Medicine”, “Metal Working/Blacksmith”, “Mining in Society”, “Moviemaking”, 
+  “Nature”, “Nuclear Science”, “Oceanography”, “Orienteering”, “Pers. Fitness”, “Photography”, 
+  “Pioneering”, “Pottery”, “Programming”, “Radio”, “Reptile & Amphibian Study”, “Rifle Shooting”,
+  “Robotics”, “Rowing”, “Shotgun Shooting”, “Signs, Signals, and Codes”, “Small-Boat Sailing”, 
+  “Space Exploration”, “Swimming”, “Weather”, “Welding”, “Wilderness Survival”, “Wood Carving”
+];
 // Declare meritBadgeList globally
 let meritBadgeList = [];
 
@@ -125,6 +136,8 @@ function login() {
         "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
     }
     populateBadgeSelection(scout);
+    meritBadgeList = scout.availableBadges || [];
+
   });
 }
 
@@ -151,10 +164,10 @@ function populateBadgeSelection(scout) {
       badgeSelectionDiv.innerHTML += `<h3>Required Merit Badges:</h3><p>${requiredBadges.join(", ")}</p>`;
     }
 
-    let availableBadges = meritBadgeList.filter(mb => !scout.earned.includes(mb));
-    badgeSelectionDiv.innerHTML += `<h3>Select 4 Merit Badges:</h3>`;
-
-    for (let i = 0; i < (4 - requiredBadges.length); i++) {
+  let numDropdowns = 4 - requiredBadges.length;
+let availableBadges = meritBadgeList.filter(mb => !scout.earned.includes(mb));
+badgeSelectionDiv.innerHTML += `<h3>Select ${numDropdowns} Merit Badge${numDropdowns > 1 ? 's' : ''}:</h3>`;
+for (let i = 0; i < numDropdowns; i++) {
       const select = document.createElement("select");
       select.name = `badge${i+1}`;
       const defaultOption = document.createElement("option");
@@ -203,19 +216,19 @@ function submitSelection() {
     return;
   }
 
-  fetch(DATA_URL, {  // Using the same DATA_URL for POST; update if needed.
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(formData)
-  })
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById("submission-status").textContent = "Selection submitted successfully!";
-  })
-  .catch(error => {
-    console.error("Error submitting selection:", error);
-    document.getElementById("submission-status").textContent = "Error submitting selection.";
-  });
+fetch(DATA_URL, {
+  method: "POST",
+  mode: "no-cors",  // This bypasses CORS check but makes the response opaque.
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(formData)
+})
+.then(() => {
+  document.getElementById("submission-status").textContent = "Selection submitted successfully!";
+})
+.catch(error => {
+  console.error("Error submitting selection:", error);
+  document.getElementById("submission-status").textContent = "Error submitting selection.";
+});
 }
