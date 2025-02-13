@@ -4,14 +4,14 @@ const DATA_URL = "https://script.google.com/macros/s/AKfycbx_Xzj7qhq1_aqKgYZD_IY
 // Declare meritBadgeList globally
 let meritBadgeList = [];
 
-// Fetch scout data from Google Sheets using provided scout ID
-async function fetchScoutData(loginId) {
+// Fetch scout data from Google Sheets using provided scout ID and password
+async function fetchScoutData(loginId, password) {
   try {
-    const response = await fetch(`${DATA_URL}?id=${loginId}`);
+    const response = await fetch(`${DATA_URL}?id=${loginId}&password=${password}`);
     const data = await response.json();
     if (data.error) {
-      console.error("Scout not found.");
-      return null;
+      console.error("Error from server:", data.error);
+      return data; // Return error object for handling in login()
     }
     // Store available merit badges
     if (data.availableBadges) {
@@ -28,6 +28,18 @@ async function fetchScoutData(loginId) {
 document.addEventListener("DOMContentLoaded", () => {
   // Attach login event listener
   document.getElementById("login-btn").addEventListener("click", login);
+
+  // Enable Enter key to trigger login
+  document.getElementById("login-id").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      login();
+    }
+  });
+  document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      login();
+    }
+  });
 
   // Attach change event listener for week selection in the poll section
   document.getElementById("weekSelector").addEventListener("change", function() {
@@ -46,9 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Login function to validate credentials and load poll section
 async function login() {
+  const loginError = document.getElementById("login-error");
+  // Show processing message
+  loginError.textContent = "Processing...";
+  
   const loginId = document.getElementById("login-id").value.trim();
   const password = document.getElementById("password").value.trim();
-  const loginError = document.getElementById("login-error");
 
   // Validate that both fields are filled
   if (!loginId || !password) {
@@ -56,7 +71,7 @@ async function login() {
     return;
   }
 
-  // Validate password
+  // Validate password locally
   if (password !== SHARED_PASSWORD) {
     loginError.textContent = "Incorrect password.";
     return;
@@ -65,25 +80,27 @@ async function login() {
   // Clear any previous error
   loginError.textContent = "";
 
-  // Fetch the scout's data
-  const scout = await fetchScoutData(loginId);
-  if (!scout) {
-    loginError.textContent = "Scout not found. Please check your Scout ID.";
+  // Fetch the scout's data (passing both id and password)
+  const scout = await fetchScoutData(loginId, password);
+  if (!scout || scout.error) {
+    loginError.textContent = scout && scout.error
+      ? scout.error + " Please check your Scout ID."
+      : "Scout not found. Please check your Scout ID.";
     return;
   }
 
-  // Successful login: Hide login section, display poll section
+  // Successful login: hide login section, show poll section
   document.getElementById("login-section").style.display = "none";
   document.getElementById("poll-section").style.display = "block";
 
   // Populate scout details
   document.getElementById("display-name").textContent = scout.name;
-  if (scout.earned.length > 0) {
+  if (scout.earned && scout.earned.length > 0) {
     document.getElementById("achievements-section").innerHTML = `<h3>Your Achieved Merit Badges:</h3><p>${scout.earned.join(", ")}</p>`;
   } else {
     document.getElementById("achievements-section").innerHTML = "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
   }
-
+  
   // Populate the merit badge selection based on scout data
   populateBadgeSelection(scout);
 }
@@ -163,7 +180,7 @@ function submitSelection() {
     return;
   }
 
-  fetch("https://script.google.com/macros/s/AKfycbx_Xzj7qhq1_aqKgYZD_IYTtD1-o9C2rQTwSih_HrROKxFL-4b1yd2y6YS8Q71y29BQ/exec", {  // Replace with your actual Apps Script URL for POST
+  fetch(DATA_URL, {  // Using the same DATA_URL for POST; update if needed.
     method: "POST",
     headers: {
       "Content-Type": "application/json"
