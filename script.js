@@ -5,23 +5,19 @@ const DATA_URL = "https://script.google.com/macros/s/AKfycbx_Xzj7qhq1_aqKgYZD_IY
 let meritBadgeList = [];
 
 // Fetch scout data from Google Sheets using provided scout ID and password
-async function fetchScoutData(loginId, password) {
-  try {
-    const response = await fetch(`${DATA_URL}?id=${loginId}&password=${password}`);
-    const data = await response.json();
-    if (data.error) {
-      console.error("Error from server:", data.error);
-      return data; // Return error object for handling in login()
-    }
-    // Store available merit badges
-    if (data.availableBadges) {
-      meritBadgeList = data.availableBadges;
-    }
-    return data;
-  } catch (error) {
-    console.error("Error fetching scout data:", error);
-    return null;
-  }
+// JSONP version to bypass CORS
+function fetchScoutDataJSONP(loginId, password, callback) {
+  const script = document.createElement('script');
+  const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
+  window[callbackName] = function(data) {
+    // Clean up the temporary script and callback
+    delete window[callbackName];
+    document.body.removeChild(script);
+    // Execute the callback with the returned data
+    callback(data);
+  };
+  script.src = `${DATA_URL}?id=${loginId}&password=${password}&callback=${callbackName}`;
+  document.body.appendChild(script);
 }
 
 // Initialize page logic after DOM loads
@@ -85,32 +81,32 @@ async function login() {
   // Clear any previous error
   loginError.textContent = "";
 
-  // Fetch the scout's data (passing both id and password)
-  const scout = await fetchScoutData(loginId, password);
-  if (!scout || scout.error) {
-    loginError.textContent = scout && scout.error
-      ? scout.error + " Please check your Scout ID."
-      : "Scout not found. Please check your Scout ID.";
+  // Instead of await fetchScoutData, use JSONP:
+  fetchScoutDataJSONP(loginId, password, function(scout) {
+    if (!scout || scout.error) {
+      loginError.textContent = scout && scout.error
+        ? scout.error + " Please check your Scout ID."
+        : "Scout not found. Please check your Scout ID.";
+      spinner.style.display = "none";
+      return;
+    }
+
+    // Hide spinner and update the UI for successful login
     spinner.style.display = "none";
-    return;
-  }
-
-  // Successful login: hide spinner and login section, show poll section
-  spinner.style.display = "none";
-  document.getElementById("login-section").style.display = "none";
-  document.getElementById("poll-section").style.display = "block";
-
-  // Populate scout details
-  document.getElementById("display-name").textContent = scout.name;
-  if (scout.earned && scout.earned.length > 0) {
-    document.getElementById("achievements-section").innerHTML = `<h3>Your Achieved Merit Badges:</h3><p>${scout.earned.join(", ")}</p>`;
-  } else {
-    document.getElementById("achievements-section").innerHTML = "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
-  }
-  
-  // Populate the merit badge selection based on scout data
-  populateBadgeSelection(scout);
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("poll-section").style.display = "block";
+    document.getElementById("display-name").textContent = scout.name;
+    if (scout.earned && scout.earned.length > 0) {
+      document.getElementById("achievements-section").innerHTML =
+        `<h3>Your Achieved Merit Badges:</h3><p>${scout.earned.join(", ")}</p>`;
+    } else {
+      document.getElementById("achievements-section").innerHTML =
+        "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
+    }
+    populateBadgeSelection(scout);
+  });
 }
+
 
 // Populate merit badge selection based on scout's year and earned badges
 function populateBadgeSelection(scout) {
