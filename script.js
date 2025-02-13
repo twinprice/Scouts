@@ -15,6 +15,7 @@ const CAMP_BADGES = [
 
 // Declare meritBadgeList globally
 let meritBadgeList = [];
+let currentScout = null;
 
 // Fetch scout data from Google Sheets using provided scout ID and password
 // JSONP version to bypass CORS
@@ -137,6 +138,7 @@ function login() {
         "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
     }
 // Update global meritBadgeList from the returned data (filtered to camp badges)
+currentScout = scout;
 meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
 console.log("Filtered camp badges:", meritBadgeList);
 
@@ -200,39 +202,65 @@ function submitSelection() {
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
   const loginId = document.getElementById("login-id").value.trim();
-  const selections = document.querySelectorAll("#badge-selection select");
-
+  
+  let finalBadges = [];
+  
+  if (currentScout) {
+    if (currentScout.year === "1st") {
+      // For 1st years, add the required badges...
+      finalBadges = ["Environmental Science", "First Aid", "Swimming"];
+      // And then add the optional badge from the radio buttons (if any)
+      const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
+      if (optionalRadio && optionalRadio.value) {
+        finalBadges.push(optionalRadio.value);
+      }
+    } else {
+      // For older scouts, determine required badges (e.g. Cooking and Emergency Preparedness if not earned)
+      let requiredBadges = [];
+      if (!currentScout.earned.includes("Cooking")) requiredBadges.push("Cooking");
+      if (!currentScout.earned.includes("Emergency Preparedness")) requiredBadges.push("Emergency Preparedness");
+      
+      // Start the final list with the required badges.
+      finalBadges = requiredBadges.slice();
+      
+      // Get additional selections from the dropdowns.
+      const selections = document.querySelectorAll("#badge-selection select");
+      selections.forEach(select => {
+        if (select.value) {
+          finalBadges.push(select.value);
+        }
+      });
+    }
+  }
+  
+  // Build the form data object.
   const formData = {
     scoutName: scoutName,
     loginId: loginId,
     selectedWeek: selectedWeek,
-    // Include the explanation only if "Provo Week" is selected
     provoReason: selectedWeek === "Provo Week" ? provoReason : "",
-    badge1: selections[0] ? selections[0].value : "",
-    badge2: selections[1] ? selections[1].value : "",
-    badge3: selections[2] ? selections[2].value : "",
-    badge4: selections[3] ? selections[3].value : ""
+    finalBadges: finalBadges  // send the final badge array
   };
-
-  // Validate that a reason is provided if Provo Week is selected
+  
+  // Validate that a reason is provided if Provo Week is selected.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
   }
-
-fetch(DATA_URL, {
-  method: "POST",
-  mode: "no-cors",  // This bypasses CORS check but makes the response opaque.
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(formData)
-})
-.then(() => {
-  document.getElementById("submission-status").textContent = "Selection submitted successfully!";
-})
-.catch(error => {
-  console.error("Error submitting selection:", error);
-  document.getElementById("submission-status").textContent = "Error submitting selection.";
-});
+  
+  fetch(DATA_URL, {
+    method: "POST",
+    mode: "no-cors",  // Using no-cors since our endpoint is not setting CORS headers.
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(() => {
+    document.getElementById("submission-status").textContent = "Selection submitted successfully!";
+  })
+  .catch(error => {
+    console.error("Error submitting selection:", error);
+    document.getElementById("submission-status").textContent = "Error submitting selection.";
+  });
 }
