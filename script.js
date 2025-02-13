@@ -1,17 +1,18 @@
 const SHARED_PASSWORD = "secure123";
 const DATA_URL = "https://script.google.com/macros/s/AKfycby_Reglu0U16qkbUojoA3-685XAcTlpvzxJj0tASSt-8ycAjCrwFKVjONMDHT_2ncVV/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
-  “Amer. Heritage”, “Animation”, “Archery”, “Art”, “Astronomy”, “Basketry”, “Camping”, 
-  “Canoeing”, “Chemistry”, “Chess”, “Cit. in Comm.”, “Cit. in Nation”, “Cit. in World”, 
-  “Climbing”, “Communication”, “Cooking”, “Emergency Preparedness”, “Engineering”, 
-  “Enviro. Science”, “First Aid”, “Fish and Wildlife”, “Fishing/Fly Fishing”, “Forestry”, 
-  “Geocaching”, “Geology”, “Graphic Arts”, “Indian Lore”, “Insect Study”, “Kayaking”, 
-  “Leatherwork”, “Medicine”, “Metal Working/Blacksmith”, “Mining in Society”, “Moviemaking”, 
-  “Nature”, “Nuclear Science”, “Oceanography”, “Orienteering”, “Pers. Fitness”, “Photography”, 
-  “Pioneering”, “Pottery”, “Programming”, “Radio”, “Reptile & Amphibian Study”, “Rifle Shooting”,
-  “Robotics”, “Rowing”, “Shotgun Shooting”, “Signs, Signals, and Codes”, “Small-Boat Sailing”, 
-  “Space Exploration”, “Swimming”, “Weather”, “Welding”, “Wilderness Survival”, “Wood Carving”
+  "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping", 
+  "Canoeing", "Chemistry", "Chess", "Cit. in Comm.", "Cit. in Nation", "Cit. in World", 
+  "Climbing", "Communication", "Cooking", "Emergency Preparedness", "Engineering", 
+  "Enviro. Science", "First Aid", "Fish and Wildlife", "Fishing/Fly Fishing", "Forestry", 
+  "Geocaching", "Geology", "Graphic Arts", "Indian Lore", "Insect Study", "Kayaking", 
+  "Leatherwork", "Medicine", "Metal Working/Blacksmith", "Mining in Society", "Moviemaking", 
+  "Nature", "Nuclear Science", "Oceanography", "Orienteering", "Pers. Fitness", "Photography", 
+  "Pioneering", "Pottery", "Programming", "Radio", "Reptile & Amphibian Study", "Rifle Shooting",
+  "Robotics", "Rowing", "Shotgun Shooting", "Signs, Signals, and Codes", "Small-Boat Sailing", 
+  "Space Exploration", "Swimming", "Weather", "Welding", "Wilderness Survival", "Wood Carving"
 ];
+
 // Declare meritBadgeList globally
 let meritBadgeList = [];
 
