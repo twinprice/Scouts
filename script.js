@@ -138,10 +138,10 @@ function login() {
     document.getElementById("display-name").textContent = scout.name;
     if (scout.earned && scout.earned.length > 0) {
       document.getElementById("achievements-section").innerHTML =
-        `<h3>Your Achieved Merit Badges:</h3><p>${scout.earned.join(", ")}</p>`;
+        `<h3>Your Earned Merit Badges (* denotes Eagle Required Merit Badges):</h3><p>${scout.earned.join(", ")}</p>`;
     } else {
       document.getElementById("achievements-section").innerHTML =
-        "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
+        "<h3>Your Earned Merit Badges (* denotes Eagle Required Merit Badges):</h3><p>None</p>";
     }
 // Update global meritBadgeList from the returned data (filtered to camp badges)
 currentScout = scout;
@@ -161,7 +161,7 @@ function populateBadgeSelection(scout) {
   if (scout.year === "1st") {
     badgeSelectionDiv.innerHTML = `
       <h3>Required Merit Badges:</h3>
-      <p>Environmental Science, First Aid, Swimming</p>
+      <p>Environmental Science*, First Aid*, Swimming*</p>
       <h3>Choose One:</h3>
       <input type="radio" name="optionalBadge" value="Archery"> Archery<br>
       <input type="radio" name="optionalBadge" value="Rifle Shooting"> Rifle Shooting<br>
