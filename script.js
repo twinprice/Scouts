@@ -136,9 +136,12 @@ function login() {
       document.getElementById("achievements-section").innerHTML =
         "<h3>Your Achieved Merit Badges:</h3><p>None</p>";
     }
-    populateBadgeSelection(scout);
-    meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
+// Update global meritBadgeList from the returned data (filtered to camp badges)
+meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
+console.log("Filtered camp badges:", meritBadgeList);
 
+// Then populate the dropdowns
+populateBadgeSelection(scout);
   });
 }
 
