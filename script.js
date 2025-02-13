@@ -138,15 +138,13 @@ function login() {
     document.getElementById("display-name").textContent = scout.name;
    if (scout.earned && scout.earned.length > 0) {
   document.getElementById("achievements-section").innerHTML =
-    `<h3>Your Earned Merit Badges</h3>
-    <br>
-    <h4><small><em>(* denotes Eagle Required Merit Badges):</em></small></h4>
+   `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
+    <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
     <p>${scout.earned.join(", ")}</p>`;
 } else {
   document.getElementById("achievements-section").innerHTML =
-    `<h3>Your Earned Merit Badges:</h3>
-    <br>
-    <h4><small><em>(* denotes Eagle Required Merit Badges)</em></small></h4>
+    `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
+    <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
     <p>None</p>`;
 }
     
