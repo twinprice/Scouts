@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "secure123";
-const DATA_URL = "https://script.google.com/macros/s/AKfycby_Reglu0U16qkbUojoA3-685XAcTlpvzxJj0tASSt-8ycAjCrwFKVjONMDHT_2ncVV/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbwU_LNfDQE3irIkNrDzO_Xn9Xgm1p_vcF692VOzVoVuQTr5utKNvRUBcB7wxP9iJNzF/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
   "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping", 
   "Canoeing", "Chemistry", "Chess", "Cit. in Comm.", "Cit. in Nation", "Cit. in World", 
