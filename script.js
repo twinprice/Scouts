@@ -9,16 +9,34 @@ let meritBadgeList = [];
 function fetchScoutDataJSONP(loginId, password, callback) {
   const script = document.createElement('script');
   const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
+  let called = false;
+  
+  // Define the callback that will be called by the JSONP response.
   window[callbackName] = function(data) {
-    // Clean up the temporary script and callback
+    called = true;
+    clearTimeout(timeout);
     delete window[callbackName];
-    document.body.removeChild(script);
-    // Execute the callback with the returned data
+    if (document.body.contains(script)) {
+      document.body.removeChild(script);
+    }
     callback(data);
   };
+
+  // Set a timeout in case the JSONP call never returns.
+  const timeout = setTimeout(() => {
+    if (!called) {
+      delete window[callbackName];
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+      callback({ error: "Timeout occurred while fetching data" });
+    }
+  }, 10000); // 10-second timeout
+
   script.src = `${DATA_URL}?id=${loginId}&password=${password}&callback=${callbackName}`;
   document.body.appendChild(script);
 }
+
 
 // Initialize page logic after DOM loads
 document.addEventListener("DOMContentLoaded", () => {
