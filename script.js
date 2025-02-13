@@ -1,16 +1,16 @@
 const SHARED_PASSWORD = "troop444_camp";
 const DATA_URL = "https://script.google.com/macros/s/AKfycbzGB6qIUoq4yJbhwLrOoZc9EiyrHgK6YyPLmY71IUPzA-oqkHgp9dsSvZkmlZWyMvI/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
-  "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping", 
-  "Canoeing", "Chemistry", "Chess", "Cit. in Comm.", "Cit. in Nation", "Cit. in World", 
-  "Climbing", "Communication", "Cooking", "Emergency Preparedness", "Engineering", 
-  "Enviro. Science", "First Aid", "Fish and Wildlife", "Fishing/Fly Fishing", "Forestry", 
+  "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping - Eagle MB", 
+  "Canoeing", "Chemistry", "Chess", "Cit. in Nation - Eagle MB", "Cit. in World - Eagle MB", 
+  "Climbing", "Cooking - Eagle MB", "Emergency Prep - Eagle MB", "Engineering", 
+  "Enviro. Science - Eagle MB", "First Aid - Eagle MB", "Fish and Wildlife", "Fishing/Fly Fishing", "Forestry", 
   "Geocaching", "Geology", "Graphic Arts", "Indian Lore", "Insect Study", "Kayaking", 
   "Leatherwork", "Medicine", "Metal Working/Blacksmith", "Mining in Society", "Moviemaking", 
   "Nature", "Nuclear Science", "Oceanography", "Orienteering", "Pers. Fitness", "Photography", 
   "Pioneering", "Pottery", "Programming", "Radio", "Reptile & Amphibian Study", "Rifle Shooting",
   "Robotics", "Rowing", "Shotgun Shooting", "Signs, Signals, and Codes", "Small-Boat Sailing", 
-  "Space Exploration", "Swimming", "Weather", "Welding", "Wilderness Survival", "Wood Carving"
+  "Space Exploration", "Swimming - Eagle MB", "Weather", "Welding", "Wilderness Survival", "Wood Carving"
 ];
 
 // Declare meritBadgeList globally
