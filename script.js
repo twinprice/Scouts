@@ -138,10 +138,12 @@ function login() {
     document.getElementById("display-name").textContent = scout.name;
     if (scout.earned && scout.earned.length > 0) {
       document.getElementById("achievements-section").innerHTML =
-        `<h3>Your Earned Merit Badges (* denotes Eagle Required Merit Badges):</h3><p>${scout.earned.join(", ")}</p>`;
+        `<h3>Your Earned Merit Badges</h3><br>
+        <h4> (* denotes Eagle Required Merit Badges):</h4><p>${scout.earned.join(", ")}</p>`;
     } else {
       document.getElementById("achievements-section").innerHTML =
-        "<h3>Your Earned Merit Badges (* denotes Eagle Required Merit Badges):</h3><p>None</p>";
+        "<h3>Your Earned Merit Badges:</h3><br>
+        <h4>(* denotes Eagle Required Merit Badges)</h4><p>None</p>";
     }
 // Update global meritBadgeList from the returned data (filtered to camp badges)
 currentScout = scout;
