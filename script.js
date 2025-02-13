@@ -59,8 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // Login function to validate credentials and load poll section
 async function login() {
   const loginError = document.getElementById("login-error");
-  // Show processing message
+  const spinner = document.getElementById("spinner");
+
+  // Show processing message and spinner
   loginError.textContent = "Processing...";
+  spinner.style.display = "block";
   
   const loginId = document.getElementById("login-id").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -68,12 +71,14 @@ async function login() {
   // Validate that both fields are filled
   if (!loginId || !password) {
     loginError.textContent = "Please enter both your Scout ID and password.";
+    spinner.style.display = "none";
     return;
   }
 
   // Validate password locally
   if (password !== SHARED_PASSWORD) {
     loginError.textContent = "Incorrect password.";
+    spinner.style.display = "none";
     return;
   }
 
@@ -86,10 +91,12 @@ async function login() {
     loginError.textContent = scout && scout.error
       ? scout.error + " Please check your Scout ID."
       : "Scout not found. Please check your Scout ID.";
+    spinner.style.display = "none";
     return;
   }
 
-  // Successful login: hide login section, show poll section
+  // Successful login: hide spinner and login section, show poll section
+  spinner.style.display = "none";
   document.getElementById("login-section").style.display = "none";
   document.getElementById("poll-section").style.display = "block";
 
