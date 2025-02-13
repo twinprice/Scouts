@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Login function to validate credentials and load poll section
-async function login() {
+function login() {
   const loginError = document.getElementById("login-error");
   const spinner = document.getElementById("spinner");
 
@@ -86,24 +86,23 @@ async function login() {
   const loginId = document.getElementById("login-id").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  // Validate that both fields are filled
+  // Validate input fields
   if (!loginId || !password) {
     loginError.textContent = "Please enter both your Scout ID and password.";
     spinner.style.display = "none";
     return;
   }
 
-  // Validate password locally
   if (password !== SHARED_PASSWORD) {
     loginError.textContent = "Incorrect password.";
     spinner.style.display = "none";
     return;
   }
 
-  // Clear any previous error
+  // Clear previous error
   loginError.textContent = "";
 
-  // Instead of await fetchScoutData, use JSONP:
+  // Use JSONP to fetch the data
   fetchScoutDataJSONP(loginId, password, function(scout) {
     if (!scout || scout.error) {
       loginError.textContent = scout && scout.error
@@ -112,8 +111,8 @@ async function login() {
       spinner.style.display = "none";
       return;
     }
-
-    // Hide spinner and update the UI for successful login
+    
+    // Successful login – hide spinner and update UI
     spinner.style.display = "none";
     document.getElementById("login-section").style.display = "none";
     document.getElementById("poll-section").style.display = "block";
@@ -128,7 +127,6 @@ async function login() {
     populateBadgeSelection(scout);
   });
 }
-
 
 // Populate merit badge selection based on scout's year and earned badges
 function populateBadgeSelection(scout) {
