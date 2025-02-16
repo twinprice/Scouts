@@ -115,3 +115,6 @@ hr {
   margin: 20px 0;
   text-align: left;
 }
+select option:disabled {
+  color: #333;
+}
