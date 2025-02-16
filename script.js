@@ -210,7 +210,7 @@ function populateBadgeSelection(scout) {
     }
 
     // Add two alternate dropdowns.
-    badgeSelectionDiv.innerHTML += `h3>Alternate Merit Badge Selections:</h3>
+    badgeSelectionDiv.innerHTML += `<h3>Alternate Merit Badge Selections:</h3>
   <p style="font-size: 0.9em; font-style: italic; color: #555;">
     Please select two additional merit badges as backups in case your primary choices are unavailable or create scheduling conflicts.
   </p>
