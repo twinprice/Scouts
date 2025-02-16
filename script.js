@@ -21,6 +21,7 @@ function getOrdinal(n) {
       v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
+
 // Fetch scout data from Google Sheets using provided scout ID and password
 // JSONP version to bypass CORS
 function fetchScoutDataJSONP(loginId, password, callback) {
@@ -164,29 +165,34 @@ function populateBadgeSelection(scout) {
   badgeSelectionDiv.innerHTML = "";
 
   if (scout.year === "1st") {
+    // For first-year scouts: show required badges and an optional radio selection.
     badgeSelectionDiv.innerHTML = `
       <h3>Required Merit Badges:</h3>
-      <p>Environmental Science*, First Aid*, Swimming*</p>
+      <p>Environmental Science, First Aid, Swimming</p>
       <h3>Choose One:</h3>
       <input type="radio" name="optionalBadge" value="Archery"> Archery<br>
       <input type="radio" name="optionalBadge" value="Rifle Shooting"> Rifle Shooting<br>
       <input type="radio" name="optionalBadge" value="Nature"> Nature
     `;
   } else {
+    // For older scouts:
     let requiredBadges = [];
-    if (!scout.earned.includes("Cooking*")) requiredBadges.push("Cooking*");
-    if (!scout.earned.includes("Emergency Prep*")) requiredBadges.push("Emergency Prep*");
+    if (!scout.earned.includes("Cooking")) requiredBadges.push("Cooking");
+    if (!scout.earned.includes("Emergency Preparedness")) requiredBadges.push("Emergency Preparedness");
 
     if (requiredBadges.length > 0) {
       badgeSelectionDiv.innerHTML += `<h3>Required Merit Badges:</h3><p>${requiredBadges.join(", ")}</p>`;
     }
 
-  let numDropdowns = 4 - requiredBadges.length;
-let availableBadges = meritBadgeList.filter(mb => !scout.earned.includes(mb));
-badgeSelectionDiv.innerHTML += `<h3>Select ${numDropdowns} Merit Badge${numDropdowns > 1 ? 's' : ''}:</h3>`;
-for (let i = 0; i < numDropdowns; i++) {
+    // Calculate number of main selection dropdowns.
+    let numMainDropdowns = 4 - requiredBadges.length;
+    let availableBadges = meritBadgeList.filter(mb => !scout.earned.includes(mb));
+
+    badgeSelectionDiv.innerHTML += `<h3>Select ${numMainDropdowns} Merit Badge${numMainDropdowns > 1 ? 's' : ''}:</h3>`;
+    for (let i = 0; i < numMainDropdowns; i++) {
       const select = document.createElement("select");
       select.name = `badge${i+1}`;
+      select.classList.add("mainBadge");
       const defaultOption = document.createElement("option");
       defaultOption.textContent = `Select ${getOrdinal(i+1)} Merit Badge`;
       defaultOption.value = "";
@@ -200,8 +206,30 @@ for (let i = 0; i < numDropdowns; i++) {
         option.textContent = badge;
         select.appendChild(option);
       });
-
       badgeSelectionDiv.appendChild(select);
+      badgeSelectionDiv.appendChild(document.createElement("br"));
+    }
+
+    // Add two alternate dropdowns.
+    badgeSelectionDiv.innerHTML += `<h3>Alternate Merit Badge Selections:</h3>`;
+    for (let i = 0; i < 2; i++) {
+      const altSelect = document.createElement("select");
+      altSelect.name = `altBadge${i+1}`;
+      altSelect.classList.add("altBadge");
+      const altDefaultOption = document.createElement("option");
+      altDefaultOption.textContent = `Select Alternate Merit Badge ${i+1}`;
+      altDefaultOption.value = "";
+      altDefaultOption.disabled = true;
+      altDefaultOption.selected = true;
+      altSelect.appendChild(altDefaultOption);
+
+      availableBadges.forEach(badge => {
+        const option = document.createElement("option");
+        option.value = badge;
+        option.textContent = badge;
+        altSelect.appendChild(option);
+      });
+      badgeSelectionDiv.appendChild(altSelect);
       badgeSelectionDiv.appendChild(document.createElement("br"));
     }
   }
@@ -213,51 +241,45 @@ function submitSelection() {
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
   const loginId = document.getElementById("login-id").value.trim();
-  const selections = document.querySelectorAll("#badge-selection select");
-
-  // Build the final badges array as before:
-  let finalBadges = [];
   
-  if (currentScout) {
-    if (currentScout.year === "1st") {
-      // For first-year scouts, required badges are fixed
-      finalBadges = ["Environmental Science", "First Aid", "Swimming"];
-      // Plus the optional badge from radio buttons:
-      const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
-      if (optionalRadio && optionalRadio.value) {
-        finalBadges.push(optionalRadio.value);
-      }
-    } else {
-      // For older scouts, start with required badges (if needed)
-      let requiredBadges = [];
-      if (!currentScout.earned.includes("Cooking*")) requiredBadges.push("Cooking*");
-      if (!currentScout.earned.includes("Emergency Prep*")) requiredBadges.push("Emergency Prep*");
-      finalBadges = requiredBadges.slice();
-      // And then add selections from dropdowns:
-      selections.forEach(select => {
-        if (select.value) {
-          finalBadges.push(select.value);
-        }
-      });
+  let formData = {
+    scoutName: scoutName,
+    loginId: loginId,
+    selectedWeek: selectedWeek,
+    provoReason: selectedWeek === "Provo Week" ? provoReason : ""
+  };
+
+  if (currentScout && currentScout.year === "1st") {
+    // For first-year scouts, required badges + optional radio.
+    let finalBadges = ["Environmental Science", "First Aid", "Swimming"];
+    const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
+    if (optionalRadio && optionalRadio.value) {
+      finalBadges.push(optionalRadio.value);
     }
+    formData.finalBadges = finalBadges;
+  } else {
+    // For older scouts: gather main and alternate selections separately.
+    let mainBadges = [];
+    document.querySelectorAll("#badge-selection select.mainBadge").forEach(select => {
+      if (select.value) {
+        mainBadges.push(select.value);
+      }
+    });
+    let altBadges = [];
+    document.querySelectorAll("#badge-selection select.altBadge").forEach(select => {
+      if (select.value) {
+        altBadges.push(select.value);
+      }
+    });
+    formData.mainBadges = mainBadges;
+    formData.altBadges = altBadges;
   }
   
-  // Validate that if Provo Week is selected, a reason is provided.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
   }
   
-  // Build form data object.
-  const formData = {
-    scoutName: scoutName,
-    loginId: loginId,
-    selectedWeek: selectedWeek,
-    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
-    finalBadges: finalBadges  // pass the final array
-  };
-  
-  // Submit the form via POST (using no-cors for now)
   fetch(DATA_URL, {
     method: "POST",
     mode: "no-cors",
@@ -267,7 +289,7 @@ function submitSelection() {
     body: JSON.stringify(formData)
   })
   .then(() => {
-    // Hide the poll section and display the completion page with details
+    // On success, hide poll section and display a completion page with submitted details.
     document.getElementById("poll-section").style.display = "none";
     let details = `<p><strong>Scout Name:</strong> ${formData.scoutName}</p>
                    <p><strong>Login ID:</strong> ${formData.loginId}</p>
@@ -275,7 +297,12 @@ function submitSelection() {
     if(formData.provoReason) {
       details += `<p><strong>Explanation:</strong> ${formData.provoReason}</p>`;
     }
-    details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
+    if (currentScout && currentScout.year === "1st") {
+      details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
+    } else {
+      details += `<p><strong>Main Selections:</strong> ${formData.mainBadges.join(", ")}</p>`;
+      details += `<p><strong>Alternate Selections:</strong> ${formData.altBadges.join(", ")}</p>`;
+    }
     document.getElementById("submission-details").innerHTML = details;
     document.getElementById("completion-page").style.display = "block";
   })
@@ -284,3 +311,4 @@ function submitSelection() {
     document.getElementById("submission-status").textContent = "Error submitting selection.";
   });
 }
+
