@@ -196,7 +196,6 @@ function populateBadgeSelection(scout) {
       const defaultOption = document.createElement("option");
       defaultOption.textContent = `Select ${getOrdinal(i+1)} Merit Badge`;
       defaultOption.value = "";
-      defaultOption.disabled = true;
       defaultOption.selected = true;
       select.appendChild(defaultOption);
 
