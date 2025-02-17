@@ -53,6 +53,16 @@ button:hover {
   animation: spin 1s linear infinite;
   margin: 10px auto; /* Centers the spinner */
 }
+#submit-spinner {
+  border: 6px solid #f3f3f3; /* Light grey background */
+  border-top: 6px solid #007bff; /* Blue spinner color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
 
 /* Animation keyframes */
 @keyframes spin {
