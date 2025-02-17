@@ -356,4 +356,4 @@ function submitSelection() {
     document.getElementById("submission-status").textContent = "Error submitting selection.";
     submitSpinner.style.display = "none";
   });
-}}
+}
