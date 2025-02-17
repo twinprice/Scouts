@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Attach login event listener
   document.getElementById("login-btn").addEventListener("click", login);
 
-  // Enable Enter key to trigger login
+  // Enable Enter key to trigger login for login-id and password fields
   document.getElementById("login-id").addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
       login();
@@ -78,17 +78,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Attach change event listener for week selection in the poll section
- document.getElementById("weekSelector").addEventListener("change", function() {
-  var explanationBox = document.getElementById("provoExplanation");
-  var explanationInput = document.getElementById("provo-reason");
-  if (this.value === "Provo Week") {
-    explanationBox.style.display = "block";
-    explanationInput.setAttribute("required", "required");
-  } else {
-    explanationBox.style.display = "none";
-    explanationInput.removeAttribute("required");
-  }
-});
+  document.getElementById("weekSelector").addEventListener("change", function() {
+    var explanationBox = document.getElementById("provoExplanation");
+    var explanationInput = document.getElementById("provo-reason");
+    if (this.value === "Provo Week") {
+      explanationBox.style.display = "block";
+      explanationInput.setAttribute("required", "required");
+    } else {
+      explanationBox.style.display = "none";
+      explanationInput.removeAttribute("required");
+    }
+  });
+
+  // Attach event listener for attendance radio buttons
+  document.querySelectorAll('input[name="attendance"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+      var badgeSection = document.getElementById("badge-selection");
+      // If "no" is selected, hide the badge selection area; otherwise, show it.
+      if (this.value === "no") {
+        badgeSection.style.display = "none";
+      } else {
+        badgeSection.style.display = "block";
+      }
+    });
+  });
 
   // Attach event listener for submission of the badge selection
   document.getElementById("submit-btn").addEventListener("click", submitSelection);
