@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "troop444_camp";
-const DATA_URL = "https://script.google.com/macros/s/AKfycbx8JIqFl_pfoznojOAdf61VZ9Eb0Fei90flsWA1NoWrlHJRXNyYXJTC78vXt6tk-AtY/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbz9wURGY1-hyGgianligopL-xWHgpmFqjkJmg2xN8H4PfzCUi0CjPm_lQfv8TCIT26x/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
   "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping*", 
   "Canoeing", "Chemistry", "Chess", "Cit. in Nation*", "Cit. in World*", 
