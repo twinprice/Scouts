@@ -91,20 +91,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Attach event listener for attendance radio buttons
-  document.querySelectorAll('input[name="attendance"]').forEach(radio => {
-    radio.addEventListener("change", function() {
-      var badgeSection = document.getElementById("badge-selection");
-      // If "no" is selected, hide the badge selection area; otherwise, show it.
-      if (this.value === "no") {
-        badgeSection.style.display = "none";
-      } else {
-        badgeSection.style.display = "block";
-      }
-    });
+document.querySelectorAll('input[name="attendance"]').forEach(radio => {
+  radio.addEventListener("change", function() {
+    var badgeSection = document.getElementById("badge-selection");
+    var weekSection = document.getElementById("week-selection");
+    var provoExplanation = document.getElementById("provoExplanation");
+    
+    if (this.value === "no") {
+      // Hide badge selection and week selection if not attending
+      badgeSection.style.display = "none";
+      weekSection.style.display = "none";
+      provoExplanation.style.display = "none";
+    } else {
+      // Show both if attending
+      badgeSection.style.display = "block";
+      weekSection.style.display = "block";
+      // Also, if week is Provo Week, the change event on weekSelector will handle the explanation box.
+    }
   });
-
-  // Attach event listener for submission of the badge selection
-  document.getElementById("submit-btn").addEventListener("click", submitSelection);
 });
 
 // Login function to validate credentials and load poll section
@@ -252,22 +256,25 @@ function populateBadgeSelection(scout) {
 }
 
 // Submit the scout's selection
-function submitSelection() {
+function function submitSelection() {
+  // Get attendance value from the radio buttons
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
   const provoReason = document.getElementById("provo-reason")?.value || "";
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
   const loginId = document.getElementById("login-id").value.trim();
   
+  // Build the base formData object
   let formData = {
     scoutName: scoutName,
     loginId: loginId,
-    selectedWeek: selectedWeek,
-    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
-    attendance: attendance  // "yes" or "no"
+    attendance: attendance, // "yes" or "no"
+    provoReason: (selectedWeek === "Provo Week") ? provoReason : ""
   };
 
+  // If attending, collect additional details
   if (attendance === "yes") {
+    formData.selectedWeek = selectedWeek;
     if (currentScout && currentScout.year === "1st") {
       // For first-year scouts: required badges plus optional radio.
       let finalBadges = ["Environmental Science", "First Aid", "Swimming"];
@@ -295,45 +302,62 @@ function submitSelection() {
     }
   }
   
-  // Validate that if Provo Week is selected, a reason is provided.
+  // Validate required Provo Week explanation.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
   }
   
+  // Show the submission spinner and clear any prior status message.
+  const submitSpinner = document.getElementById("submit-spinner");
+  submitSpinner.style.display = "block";
+  document.getElementById("submission-status").textContent = "";
+  
   // Submit the form via POST.
   fetch(DATA_URL, {
     method: "POST",
-    mode: "no-cors", // Using no-cors for now
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(formData)
   })
   .then(() => {
-    // On success, hide poll section and display a completion page with details.
+    // Hide the submission spinner.
+    submitSpinner.style.display = "none";
+    
+    // Hide the poll section and prepare the completion page details.
     document.getElementById("poll-section").style.display = "none";
     let details = `<p><strong>Scout Name:</strong> ${formData.scoutName}</p>
-                   <p><strong>Login ID:</strong> ${formData.loginId}</p>
-                   <p><strong>Attendance:</strong> ${formData.attendance === "yes" ? "Attending" : "Not Attending"}</p>
-                   <p><strong>Selected Week:</strong> ${formData.selectedWeek}</p>`;
+                   <p><strong>Login ID:</strong> ${formData.loginId}</p>`;
+    
+    // Only show week details if the scout is attending.
+    if (attendance === "yes") {
+      details += `<p><strong>Selected Week:</strong> ${formData.selectedWeek}</p>`;
+    }
+    
     if(formData.provoReason) {
       details += `<p><strong>Explanation:</strong> ${formData.provoReason}</p>`;
     }
-    if (formData.attendance === "yes") {
+    
+    if (attendance === "yes") {
       if (currentScout && currentScout.year === "1st") {
         details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
       } else {
         details += `<p><strong>Main Selections:</strong> ${formData.mainBadges.join(", ")}</p>`;
         details += `<p><strong>Alternate Selections:</strong> ${formData.altBadges.join(", ")}</p>`;
       }
+    } else {
+      details += `<p><strong>Attendance:</strong> Not Attending</p>`;
     }
+    
     document.getElementById("submission-details").innerHTML = details;
     document.getElementById("completion-page").style.display = "block";
   })
   .catch(error => {
     console.error("Error submitting selection:", error);
     document.getElementById("submission-status").textContent = "Error submitting selection.";
+    submitSpinner.style.display = "none";
   });
 }
 
