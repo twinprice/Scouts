@@ -93,24 +93,29 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Attach event listener for attendance radio buttons
-document.querySelectorAll('input[name="attendance"]').forEach(radio => {
-  radio.addEventListener("change", function() {
-    var badgeSection = document.getElementById("badge-selection");
-    var weekSection = document.getElementById("week-selection");
-    var provoExplanation = document.getElementById("provoExplanation");
-    
-    if (this.value === "no") {
-      // Hide badge selection and week selection if not attending
-      badgeSection.style.display = "none";
-      weekSection.style.display = "none";
-      provoExplanation.style.display = "none";
-    } else {
-      // Show both if attending
-      badgeSection.style.display = "block";
-      weekSection.style.display = "block";
-      // Also, if week is Provo Week, the change event on weekSelector will handle the explanation box.
-    }
+  document.querySelectorAll('input[name="attendance"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+      var badgeSection = document.getElementById("badge-selection");
+      var weekSection = document.getElementById("week-selection");
+      var provoExplanation = document.getElementById("provoExplanation");
+      
+      if (this.value === "no") {
+        // Hide badge selection and week selection if not attending
+        badgeSection.style.display = "none";
+        weekSection.style.display = "none";
+        provoExplanation.style.display = "none";
+      } else {
+        // Show both if attending
+        badgeSection.style.display = "block";
+        weekSection.style.display = "block";
+        // Also, if week is Provo Week, the change event on weekSelector will handle the explanation box.
+      }
+    });
   });
+
+  // Attach event listener for form submission
+  document.getElementById("submit-btn").addEventListener("click", submitSelection);
+
 });
 
 // Login function to validate credentials and load poll section
