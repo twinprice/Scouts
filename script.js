@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "troop444_camp";
-const DATA_URL = "https://script.google.com/macros/s/AKfycbxsLHGtp9K2WC1mKJGsFkGhmXnIzgScT2e7xiioj9b-d_UPhi5e-LXqd9hJeB17ZqXp/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbx8JIqFl_pfoznojOAdf61VZ9Eb0Fei90flsWA1NoWrlHJRXNyYXJTC78vXt6tk-AtY/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
   "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping*", 
   "Canoeing", "Chemistry", "Chess", "Cit. in Nation*", "Cit. in World*", 
@@ -240,6 +240,7 @@ function populateBadgeSelection(scout) {
 
 // Submit the scout's selection
 function submitSelection() {
+  const attendance = document.querySelector('input[name="attendance"]:checked').value;
   const provoReason = document.getElementById("provo-reason")?.value || "";
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
@@ -249,62 +250,70 @@ function submitSelection() {
     scoutName: scoutName,
     loginId: loginId,
     selectedWeek: selectedWeek,
-    provoReason: selectedWeek === "Provo Week" ? provoReason : ""
+    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
+    attendance: attendance  // "yes" or "no"
   };
 
-  if (currentScout && currentScout.year === "1st") {
-    // For first-year scouts, required badges + optional radio.
-    let finalBadges = ["Environmental Science", "First Aid", "Swimming"];
-    const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
-    if (optionalRadio && optionalRadio.value) {
-      finalBadges.push(optionalRadio.value);
+  if (attendance === "yes") {
+    if (currentScout && currentScout.year === "1st") {
+      // For first-year scouts: required badges plus optional radio.
+      let finalBadges = ["Environmental Science", "First Aid", "Swimming"];
+      const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
+      if (optionalRadio && optionalRadio.value) {
+        finalBadges.push(optionalRadio.value);
+      }
+      formData.finalBadges = finalBadges;
+    } else {
+      // For older scouts: gather main and alternate selections.
+      let mainBadges = [];
+      document.querySelectorAll("#badge-selection select.mainBadge").forEach(select => {
+        if (select.value) {
+          mainBadges.push(select.value);
+        }
+      });
+      let altBadges = [];
+      document.querySelectorAll("#badge-selection select.altBadge").forEach(select => {
+        if (select.value) {
+          altBadges.push(select.value);
+        }
+      });
+      formData.mainBadges = mainBadges;
+      formData.altBadges = altBadges;
     }
-    formData.finalBadges = finalBadges;
-  } else {
-    // For older scouts: gather main and alternate selections separately.
-    let mainBadges = [];
-    document.querySelectorAll("#badge-selection select.mainBadge").forEach(select => {
-      if (select.value) {
-        mainBadges.push(select.value);
-      }
-    });
-    let altBadges = [];
-    document.querySelectorAll("#badge-selection select.altBadge").forEach(select => {
-      if (select.value) {
-        altBadges.push(select.value);
-      }
-    });
-    formData.mainBadges = mainBadges;
-    formData.altBadges = altBadges;
   }
   
+  // Validate that if Provo Week is selected, a reason is provided.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
   }
   
+  // Submit the form via POST.
   fetch(DATA_URL, {
     method: "POST",
-    mode: "no-cors",
+    mode: "no-cors", // Using no-cors for now
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(formData)
   })
   .then(() => {
-    // On success, hide poll section and display a completion page with submitted details.
+    // On success, hide poll section and display a completion page with details.
     document.getElementById("poll-section").style.display = "none";
     let details = `<p><strong>Scout Name:</strong> ${formData.scoutName}</p>
                    <p><strong>Login ID:</strong> ${formData.loginId}</p>
+                   <p><strong>Attendance:</strong> ${formData.attendance === "yes" ? "Attending" : "Not Attending"}</p>
                    <p><strong>Selected Week:</strong> ${formData.selectedWeek}</p>`;
     if(formData.provoReason) {
       details += `<p><strong>Explanation:</strong> ${formData.provoReason}</p>`;
     }
-    if (currentScout && currentScout.year === "1st") {
-      details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
-    } else {
-      details += `<p><strong>Main Selections:</strong> ${formData.mainBadges.join(", ")}</p>`;
-      details += `<p><strong>Alternate Selections:</strong> ${formData.altBadges.join(", ")}</p>`;
+    if (formData.attendance === "yes") {
+      if (currentScout && currentScout.year === "1st") {
+        details += `<p><strong>Selected Badges:</strong> ${formData.finalBadges.join(", ")}</p>`;
+      } else {
+        details += `<p><strong>Main Selections:</strong> ${formData.mainBadges.join(", ")}</p>`;
+        details += `<p><strong>Alternate Selections:</strong> ${formData.altBadges.join(", ")}</p>`;
+      }
     }
     document.getElementById("submission-details").innerHTML = details;
     document.getElementById("completion-page").style.display = "block";
