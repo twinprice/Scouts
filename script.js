@@ -257,26 +257,24 @@ function populateBadgeSelection(scout) {
 
 // Submit the scout's selection
 function submitSelection() {
-  // Get attendance value from the radio buttons
+  // Define attendance from the radio buttons.
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
   const provoReason = document.getElementById("provo-reason")?.value || "";
   const selectedWeek = document.getElementById("weekSelector").value;
   const scoutName = document.getElementById("display-name").textContent;
   const loginId = document.getElementById("login-id").value.trim();
   
-  // Build the base formData object
   let formData = {
     scoutName: scoutName,
     loginId: loginId,
-    attendance: attendance, // "yes" or "no"
-    provoReason: (selectedWeek === "Provo Week") ? provoReason : ""
+    provoReason: selectedWeek === "Provo Week" ? provoReason : "",
+    attendance: attendance
   };
 
-  // If attending, collect additional details
   if (attendance === "yes") {
     formData.selectedWeek = selectedWeek;
     if (currentScout && currentScout.year === "1st") {
-      // For first-year scouts: required badges plus optional radio.
+      // For first-year scouts, required badges plus optional radio.
       let finalBadges = ["Environmental Science", "First Aid", "Swimming"];
       const optionalRadio = document.querySelector('input[name="optionalBadge"]:checked');
       if (optionalRadio && optionalRadio.value) {
@@ -284,7 +282,7 @@ function submitSelection() {
       }
       formData.finalBadges = finalBadges;
     } else {
-      // For older scouts: gather main and alternate selections.
+      // For older scouts: gather main and alternate selections separately.
       let mainBadges = [];
       document.querySelectorAll("#badge-selection select.mainBadge").forEach(select => {
         if (select.value) {
@@ -302,7 +300,6 @@ function submitSelection() {
     }
   }
   
-  // Validate required Provo Week explanation.
   if (selectedWeek === "Provo Week" && provoReason.trim() === "") {
     alert("Please provide a reason for selecting Provo Week.");
     return;
@@ -336,7 +333,7 @@ function submitSelection() {
       details += `<p><strong>Selected Week:</strong> ${formData.selectedWeek}</p>`;
     }
     
-    if(formData.provoReason) {
+    if (formData.provoReason) {
       details += `<p><strong>Explanation:</strong> ${formData.provoReason}</p>`;
     }
     
@@ -360,4 +357,3 @@ function submitSelection() {
     submitSpinner.style.display = "none";
   });
 }
-
