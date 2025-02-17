@@ -28,6 +28,8 @@ function fetchScoutDataJSONP(loginId, password, callback) {
   const script = document.createElement('script');
   const callbackName = 'jsonpCallback_' + Math.floor(Math.random() * 1000000);
   
+  let timeout; // Declare timeout here
+
   // Define the global callback
   window[callbackName] = function(data) {
     clearTimeout(timeout);
@@ -41,8 +43,8 @@ function fetchScoutDataJSONP(loginId, password, callback) {
     }, 0);
   };
 
-  // Set a timeout for the JSONP request
-  const timeout = setTimeout(() => {
+  // Now assign timeout
+  timeout = setTimeout(() => {
     // If the callback hasn’t been called, call it with an error
     callback({ error: "Timeout occurred while fetching data" });
     // Clean up the callback and script
