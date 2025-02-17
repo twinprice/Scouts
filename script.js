@@ -1,5 +1,5 @@
 const SHARED_PASSWORD = "troop444_camp";
-const DATA_URL = "https://script.google.com/macros/s/AKfycbz9wURGY1-hyGgianligopL-xWHgpmFqjkJmg2xN8H4PfzCUi0CjPm_lQfv8TCIT26x/exec"; // Replace with your actual Apps Script URL
+const DATA_URL = "https://script.google.com/macros/s/AKfycbyT7VXahaW_SXLPVNtymGxIfrrn05Em0lelHUYL9Z_xb_IHSI9uQJ0dKI9bJEuxHRVl/exec"; // Replace with your actual Apps Script URL
 const CAMP_BADGES = [
   "Amer. Heritage", "Animation", "Archery", "Art", "Astronomy", "Basketry", "Camping*", 
   "Canoeing", "Chemistry", "Chess", "Cit. in Nation*", "Cit. in World*", 
@@ -148,40 +148,57 @@ function login() {
 
   // Use JSONP to fetch the data
   fetchScoutDataJSONP(loginId, password, function(scout) {
-    if (!scout || scout.error) {
-      loginError.textContent = scout && scout.error
-        ? scout.error + " Please check your Scout ID."
-        : "Scout not found. Please check your Scout ID.";
-      spinner.style.display = "none";
-      return;
-    }
-    
-    // Successful login – hide spinner and update UI
+  if (!scout || scout.error) {
+    loginError.textContent = scout && scout.error
+      ? scout.error + " Please check your Scout ID."
+      : "Scout not found. Please check your Scout ID.";
     spinner.style.display = "none";
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("poll-section").style.display = "block";
-    document.getElementById("display-name").textContent = scout.name;
-   if (scout.earned && scout.earned.length > 0) {
-  document.getElementById("achievements-section").innerHTML =
-   `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
-    <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
-    <p>${scout.earned.join(", ")}</p>`;
-} else {
-  document.getElementById("achievements-section").innerHTML =
-    `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
-    <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
-    <p>None</p>`;
-}
-    
-// Update global meritBadgeList from the returned data (filtered to camp badges)
-currentScout = scout;
-meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
-console.log("Filtered camp badges:", meritBadgeList);
+    return;
+  }
 
-// Then populate the dropdowns
-populateBadgeSelection(scout);
-  });
+ if (scout.submitted && scout.submissionDetails) {
+  alert(`A submission has already been made for ${scout.name}. You may review your selections below or resubmit if necessary.`);
+
+  // Extract submission details from the response (adjust indices based on your Google Sheet columns)
+  const details = scout.submissionDetails;
+  const submittedWeek = details[3];
+  const submittedProvoReason = details[4] || "None";
+  const submittedBadges = details.slice(5).filter(badge => badge !== "").join(", ");
+
+  document.getElementById("previous-submission").innerHTML = `
+    <h3>Previous Submission:</h3>
+    <p><strong>Week:</strong> ${submittedWeek}</p>
+    <p><strong>Provo Reason:</strong> ${submittedProvoReason}</p>
+    <p><strong>Merit Badges:</strong> ${submittedBadges || "None"}</p>
+    <p style="font-style: italic; color: #555;">You may update your selections and submit again if needed.</p>
+  `;
+} else {
+  document.getElementById("previous-submission").innerHTML = ""; // Clear if no previous submission
 }
+
+  spinner.style.display = "none";
+  document.getElementById("login-section").style.display = "none";
+  document.getElementById("poll-section").style.display = "block";
+  document.getElementById("display-name").textContent = scout.name;
+
+  if (scout.earned && scout.earned.length > 0) {
+    document.getElementById("achievements-section").innerHTML =
+      `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
+      <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
+      <p>${scout.earned.join(", ")}</p>`;
+  } else {
+    document.getElementById("achievements-section").innerHTML =
+      `<h3 style="margin-bottom:0;">Your Earned Merit Badges:</h3>
+      <h4 style="margin:0; font-size:0.9em;"><em>(* denotes Eagle Required Merit Badges)</em></h4>
+      <p>None</p>`;
+  }
+
+  currentScout = scout;
+  meritBadgeList = (scout.availableBadges || []).filter(badge => CAMP_BADGES.includes(badge));
+  console.log("Filtered camp badges:", meritBadgeList);
+
+  populateBadgeSelection(scout);
+});
 
 // Populate merit badge selection based on scout's year and earned badges
 function populateBadgeSelection(scout) {
