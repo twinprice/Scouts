@@ -256,7 +256,7 @@ function populateBadgeSelection(scout) {
 }
 
 // Submit the scout's selection
-function function submitSelection() {
+function submitSelection() {
   // Get attendance value from the radio buttons
   const attendance = document.querySelector('input[name="attendance"]:checked').value;
   const provoReason = document.getElementById("provo-reason")?.value || "";
